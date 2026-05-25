@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBT Test - RPrep</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,Arial,sans-serif;background:#e9eef7;color:#111827}
+.exam-top{background:#123c69;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.exam-top h2{font-size:18px}
+.timer{background:#fff;color:#dc2626;padding:8px 16px;border-radius:4px;font-weight:800;font-size:18px}
+.exam-wrap{display:grid;grid-template-columns:1fr 310px;gap:12px;padding:12px;max-width:1400px;margin:auto}
+.main{background:white;border:1px solid #cbd5e1;min-height:78vh}
+.info-bar{background:#f8fafc;border-bottom:1px solid #cbd5e1;padding:10px 14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700;color:#1e3a8a}
+.q-area{padding:18px}
+.q-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:15px}
+.qno{font-size:18px;font-weight:800;color:#111827}
+.mark-btn{background:#f59e0b;color:white;border:0;padding:8px 12px;border-radius:4px;font-weight:800}
+.qtext{font-size:17px;font-weight:700;line-height:1.6;margin-bottom:20px}
+.option{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #d1d5db;margin-bottom:10px;border-radius:4px;cursor:pointer;background:#fff}
+.option:hover{background:#eff6ff;border-color:#2563eb}
+.option.selected{background:#dbeafe;border-color:#1d4ed8}
+.option input{margin-top:3px}
+.bottom-bar{border-top:1px solid #cbd5e1;background:#f8fafc;padding:12px;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.btn{border:0;padding:11px 16px;border-radius:4px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}
+.blue{background:#2563eb;color:white}.green{background:#16a34a;color:white}.orange{background:#f97316;color:white}.gray{background:#e5e7eb;color:#111827}.red{background:#dc2626;color:white}
+.side{background:white;border:1px solid #cbd5e1}
+.profile{background:#f8fafc;padding:12px;border-bottom:1px solid #cbd5e1}
+.profile h3{font-size:15px;color:#123c69}.profile p{font-size:12px;color:#64748b;margin-top:3px}
+.legend{padding:12px;border-bottom:1px solid #cbd5e1;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px}
+.leg{display:flex;align-items:center;gap:6px}
+.box{width:24px;height:24px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;border:1px solid #cbd5e1}
+.notvisited{background:#e5e7eb}.answered{background:#16a34a;color:white}.notanswered{background:#dc2626;color:white}.marked{background:#7c3aed;color:white}.markedans{background:#2563eb;color:white}
+.palette-title{background:#123c69;color:white;padding:10px 12px;font-weight:800}
+.palette{padding:12px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:330px;overflow:auto}
+.pbtn{height:34px;border:1px solid #cbd5e1;border-radius:4px;font-weight:800;cursor:pointer}
+.pbtn.current{outline:3px solid #f59e0b}
+.submit-box{padding:12px;border-top:1px solid #cbd5e1}
+.summary{font-size:13px;line-height:1.9;margin-bottom:10px}
+.loading{padding:40px;text-align:center;background:white;margin:20px;border-radius:8px}
+.solution-card{background:white;border:1px solid #cbd5e1;margin:12px;padding:16px;border-radius:6px}
+.correct{background:#dcfce7;border-color:#16a34a}.wrong{background:#fee2e2;border-color:#dc2626}
+.exp{background:#eff6ff;padding:10px;border-radius:5px;margin-top:10px;color:#1e40af;font-size:13px}
+@media(max-width:900px){.exam-wrap{grid-template-columns:1fr}.side{order:-1}.palette{max-height:none}.exam-top h2{font-size:15px}}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Loading CBT test...</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+const params=new URLSearchParams(location.search);
+const subject=params.get("subject")||"infection-control";
+const testNo=parseInt(params.get("test")||"1");
+const mode=params.get("mode");
+const retest=params.get("retest")==="1";
+let questions=[],current=0,answers={},marked={},visited={},timer=3600,interval=null,submitted=false;
+const KEY="rprep_cbt_"+subject+"_test_"+testNo;
+
+function isMobileDevice(){
+ return window.innerWidth <= 900;
+}
+
+function isLandscapeMode(){
+ return window.innerWidth > window.innerHeight;
+}
+
+function showLandscapeWarning(){
+ app.innerHTML = `
+ <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#e9eef7;">
+  <div style="background:white;max-width:420px;width:100%;padding:25px;border-radius:12px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.12);">
+   <h2 style="color:#dc2626;margin-bottom:12px;">⚠️ Rotate Your Phone</h2>
+   <p style="font-size:15px;line-height:1.6;color:#334155;">
+    CBT exam start karne ke liye phone ko <b>Landscape / Horizontal Mode</b> me rotate karein.
+   </p>
+   <div style="font-size:55px;margin:18px 0;">📱↔️</div>
+   <p style="font-size:13px;color:#64748b;">
+    Agar rotate nahi ho raha hai to phone ka <b>Auto Rotate</b> ON karein.
+   </p>
+   <br>
+   <a href="subjects.html?subject=${subject}" style="display:inline-block;background:#2563eb;color:white;text-decoration:none;padding:11px 18px;border-radius:6px;font-weight:800;">← Back to Tests</a>
+  </div>
+ </div>`;
+}
+
+function checkLandscapeBeforeStart(){
+ if(isMobileDevice() && !isLandscapeMode()){
+   showLandscapeWarning();
+   return false;
+ }
+ return true;
+}
+
+window.addEventListener("resize",()=>{
+ if(isMobileDevice() && !isLandscapeMode()){
+   showLandscapeWarning();
+   return;
+ }
+
+ if(!questions.length){
+   loadTest();
+ }else if(mode==="solution"){
+   renderSolutions();
+ }else{
+   renderExam();
+   startTimer();
+ }
+});
+
+
+auth.onAuthStateChanged(async user=>{
+ if(!user){location.href="index.html";return}
+
+ if(!checkLandscapeBeforeStart()) return;
+
+ if(retest){
+  localStorage.removeItem(KEY);
+  localStorage.removeItem(KEY+"_time");
+ }
+
+ await loadTest();
+});
+
+async function loadTest(){
+ try{
+  const cached=localStorage.getItem(KEY+"_questions");
+  if(cached){questions=JSON.parse(cached)}
+  else{
+   const snap=await db.collection("subject_tests").where("subject_id","==",subject).where("test_number","==",testNo).limit(1).get();
+   if(snap.empty){app.innerHTML='<div class="loading"><h2>Test not found</h2><br><a class="btn blue" href="subjects.html?subject='+subject+'">Back</a></div>';return}
+   const d=snap.docs[0].data();
+   questions=d.questions||[];
+   timer=(d.time_limit||60)*60;
+   localStorage.setItem(KEY+"_questions",JSON.stringify(questions));
+   localStorage.setItem(KEY+"_default_time",timer);
+  }
+  restore();
+  if(mode==="solution"){renderSolutions();return}
+  visited[current]=true;
+  renderExam();
+  startTimer();
+ }catch(e){
+  console.log(e);
+  app.innerHTML='<div class="loading"><h2>Error loading test</h2><p>Firebase index/rules check karo.</p></div>';
+ }
+}
+
+function restore(){
+ const s=localStorage.getItem(KEY);
+ if(s){const d=JSON.parse(s);answers=d.answers||{};marked=d.marked||{};visited=d.visited||{};current=d.current||0}
+ else{questions.forEach((_,i)=>{answers[i]=null;marked[i]=false;visited[i]=false})}
+ timer=parseInt(localStorage.getItem(KEY+"_time")||localStorage.getItem(KEY+"_default_time")||"3600");
+}
+function save(){
+ if(submitted)return;
+ localStorage.setItem(KEY,JSON.stringify({answers,marked,visited,current}));
+ localStorage.setItem(KEY+"_time",timer);
+}
+function statusClass(i){
+ if(marked[i] && answers[i]!==null)return "markedans";
+ if(marked[i])return "marked";
+ if(answers[i]!==null)return "answered";
+ if(visited[i])return "notanswered";
+ return "notvisited";
+}
+function counts(){
+ let a=0,na=0,nv=0,m=0,ma=0;
+ questions.forEach((_,i)=>{let c=statusClass(i);if(c==="answered")a++;else if(c==="notanswered")na++;else if(c==="notvisited")nv++;else if(c==="marked")m++;else if(c==="markedans")ma++});
+ return {a,na,nv,m,ma};
+}
+function renderExam(){
+ const c=counts();
+ app.innerHTML=`
+ <div class="exam-top">
+  <h2>RPrep CBT Examination</h2>
+  <div><b>${subject.replaceAll("-"," ").toUpperCase()}</b> | Test ${testNo}</div>
+  <div class="timer" id="timerBox">60:00</div>
+ </div>
+ <div class="exam-wrap">
+  <div class="main">
+   <div class="info-bar"><span>Question ${current+1} of ${questions.length}</span><span>Single Choice Question</span></div>
+   <div class="q-area" id="qArea"></div>
+   <div class="bottom-bar">
+    <div>
+     <button class="btn gray" onclick="clearResponse()">Clear Response</button>
+     <button class="btn orange" onclick="markReview()">Mark for Review</button>
+    </div>
+    <div>
+     <button class="btn gray" onclick="prevQ()">Previous</button>
+     <button class="btn blue" onclick="saveNext()">Save & Next</button>
+    </div>
+   </div>
+  </div>
+  <div class="side">
+   <div class="profile"><h3>Candidate Panel</h3><p>Logged in student · Auto saved locally</p></div>
+   <div class="legend">
+    <div class="leg"><span class="box answered">${c.a}</span> Answered</div>
+    <div class="leg"><span class="box notanswered">${c.na}</span> Not Answered</div>
+    <div class="leg"><span class="box notvisited">${c.nv}</span> Not Visited</div>
+    <div class="leg"><span class="box marked">${c.m}</span> Marked</div>
+    <div class="leg"><span class="box markedans">${c.ma}</span> Marked+Ans</div>
+   </div>
+   <div class="palette-title">Question Palette</div>
+   <div class="palette" id="palette"></div>
+   <div class="submit-box">
+    <div class="summary">Answered: ${c.a+c.ma}<br>Not Answered: ${c.na}<br>Marked: ${c.m+c.ma}</div>
+    <button class="btn green" style="width:100%" onclick="submitTest()">Submit Test</button>
+   </div>
+  </div>
+ </div>`;
+ renderQuestion();renderPalette();updateTimer();
+}
+function renderQuestion(){
+ const q=questions[current]||{};
+ qArea.innerHTML=`
+ <div class="q-head"><div class="qno">Question No. ${current+1}</div><button class="mark-btn" onclick="markReview()">★ Mark</button></div>
+ <div class="qtext">${q.question||""}</div>
+ ${(q.options||[]).map((o,i)=>`<label class="option ${answers[current]===i?'selected':''}"><input type="radio" name="opt" ${answers[current]===i?'checked':''} onclick="selectOpt(${i})"> <span>${String.fromCharCode(65+i)}) ${o}</span></label>`).join("")}`;
+}
+function renderPalette(){
+ palette.innerHTML="";
+ questions.forEach((_,i)=>{
+  const b=document.createElement("button");
+  b.className="pbtn "+statusClass(i)+(i===current?" current":"");
+  b.innerText=i+1;
+  b.onclick=()=>{current=i;visited[i]=true;save();renderExam()}
+  palette.appendChild(b);
+ });
+}
+function selectOpt(i){answers[current]=i;visited[current]=true;save();renderExam()}
+function clearResponse(){answers[current]=null;visited[current]=true;save();renderExam()}
+function markReview(){marked[current]=!marked[current];visited[current]=true;save();renderExam()}
+function saveNext(){visited[current]=true;if(current<questions.length-1)current++;visited[current]=true;save();renderExam()}
+function prevQ(){if(current>0){current--;visited[current]=true;save();renderExam()}}
+
+function startTimer(){
+ if(interval)clearInterval(interval);
+ interval=setInterval(()=>{timer--;if(timer%5===0)save();updateTimer();if(timer<=0){submitTest(true)}},1000);
+}
+function updateTimer(){
+ const m=Math.floor(Math.max(0,timer)/60),s=Math.max(0,timer)%60;
+ const el=document.getElementById("timerBox");
+ if(el)el.innerText=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+async function submitTest(auto=false){
+ if(submitted)return;
+ if(!auto && !confirm("Submit final test?"))return;
+ submitted=true;clearInterval(interval);
+ let correct=0;questions.forEach((q,i)=>{if(answers[i]===q.correct)correct++});
+ const score=Math.round(correct/questions.length*100);
+ try{
+  const user=auth.currentUser;
+  await db.collection("users").doc(user.uid).collection("subject_results").doc(subject+"_test_"+testNo).set({
+   subject_id:subject,test_number:testNo,score,correct,total:questions.length,answers,marked,submitted_at:new Date().toISOString()
+  });
+ }catch(e){}
+ localStorage.removeItem(KEY);localStorage.removeItem(KEY+"_time");
+ app.innerHTML=`<div class="loading"><h2>Test Submitted</h2><h1>${score}%</h1><p>${correct}/${questions.length} correct</p><br>
+ <a class="btn blue" href="subject-test.html?subject=${subject}&test=${testNo}&mode=solution">View Solutions</a>
+ <a class="btn gray" href="subjects.html?subject=${subject}">Back to Tests</a></div>`;
+}
+function renderSolutions(){
+ let html=`<div class="exam-top"><h2>Solutions</h2><a class="btn gray" href="subjects.html?subject=${subject}">Back</a></div>`;
+ questions.forEach((q,i)=>{
+  html+=`<div class="solution-card"><b>Q${i+1}. ${q.question}</b><br><br>`;
+  (q.options||[]).forEach((o,j)=>{html+=`<div class="option ${j===q.correct?'correct':''}">${String.fromCharCode(65+j)}) ${o}${j===q.correct?' ✅':''}</div>`});
+  html+=`<div class="exp">💡 ${q.explanation||"Explanation not added."}</div></div>`;
+ });
+ app.innerHTML=html;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tests - RPrep</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#fef9f0 0%,#fff5e6 100%);color:#1a1a2e}
+.header{background:rgba(255,255,255,.96);position:sticky;top:0;z-index:1000;box-shadow:0 2px 20px rgba(0,0,0,.05);padding:1rem 2rem}
+.nav-container{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.logo h1{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#1e3c72,#2a5298,#e74c3c);-webkit-background-clip:text;background-clip:text;color:transparent}.logo p{font-size:.7rem;color:#e74c3c}
+.nav-links{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}.nav-links a{text-decoration:none;color:#333;font-weight:500}.nav-links a:hover{color:#e74c3c}
+.logout-btn{background:transparent;border:2px solid #e74c3c;color:#e74c3c;padding:.5rem 1.2rem;border-radius:50px;cursor:pointer;font-weight:600}.logout-btn:hover{background:#e74c3c;color:white}
+.menu-btn{display:none;font-size:1.8rem;background:none;border:none;cursor:pointer}
+
+.page{max-width:1400px;margin:2rem auto;padding:0 2rem}
+.top-card{background:white;border-radius:1.5rem;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,.05);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.top-card h2{color:#1e3c72;font-size:1.5rem}.top-card p{color:#666;font-size:.9rem;margin-top:.3rem}
+.back-btn{background:#1e3c72;color:white;text-decoration:none;padding:.7rem 1.2rem;border-radius:50px;font-weight:700;font-size:.85rem}
+.tests-section{background:white;border-radius:1.5rem;padding:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,.05)}
+.section-title{font-size:1.1rem;font-weight:700;color:#1e3c72;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid #e74c3c;display:inline-block}
+.tests-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.test-card{background:#f8f9fc;border-radius:1rem;padding:1rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:.3s;border:1px solid #e0e0e0}
+.test-card:hover{background:#e8f0fe;border-color:#e74c3c;transform:translateY(-2px)}
+.test-name{font-weight:700;color:#1e3c72;font-size:.95rem}.test-meta{font-size:.72rem;color:#888;margin-top:.25rem}
+.test-badge{font-size:1rem;font-weight:800;color:#e74c3c;background:white;border-radius:14px;padding:.55rem .75rem;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.empty{padding:2rem;text-align:center;color:#777}
+.footer{background:#1a1a2e;color:#ccc;margin-top:3rem;padding:2rem 2rem 1rem}
+.footer-content{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem}
+.footer-section h4{color:white;margin-bottom:1rem;font-size:1rem}.footer-section a{display:block;color:#aaa;text-decoration:none;margin:.5rem 0;font-size:.85rem}
+.social-links{display:flex;gap:1rem;margin-top:1rem}.social-links a{background:#333;width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#aaa;text-decoration:none}
+.copyright{text-align:center;padding-top:2rem;margin-top:2rem;border-top:1px solid #333;font-size:.75rem}
+@media(max-width:768px){.menu-btn{display:block}.nav-links{display:none;width:100%;flex-direction:column;background:white;padding:1rem;border-radius:1rem;margin-top:1rem}.nav-links.show{display:flex}}
+@media(max-width:600px){.page{padding:0 1rem}.tests-grid{grid-template-columns:1fr}.top-card{align-items:flex-start}}
+
+.pagination{display:flex;justify-content:center;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:1.5rem}
+.page-btn{border:1px solid #e0e0e0;background:white;color:#1e3c72;padding:.55rem .85rem;border-radius:12px;font-weight:800;cursor:pointer}
+.page-btn.active{background:#e74c3c;color:white;border-color:#e74c3c}
+.page-btn:disabled{opacity:.45;cursor:not-allowed}
+
+
+.popup-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:18px}
+.popup-box{background:white;width:100%;max-width:380px;border-radius:18px;padding:22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.popup-box h3{color:#1e3c72;margin-bottom:8px}
+.popup-box p{color:#64748b;font-size:.85rem;margin-bottom:16px}
+.popup-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.popup-btn{border:0;border-radius:50px;padding:.75rem 1.1rem;font-weight:800;cursor:pointer}
+.popup-start{background:#1e3c72;color:white}
+.popup-solution{background:#16a34a;color:white}
+.popup-close{background:#e5e7eb;color:#111827}
+
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="nav-container">
+    <div class="logo"><h1>RPrep</h1><p>Your Nursing Success Partner</p></div>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="subjects.html?subject=365-days-challenge">All Tests</a>
+      <a href="#">Leaderboard</a>
+      <a href="#">Scorecards</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div class="top-card">
+    <div>
+      <h2 id="subjectTitle">Loading...</h2>
+      <p id="subjectInfo">Loading tests from Firebase...</p>
+    </div>
+    <a href="dashboard.html" class="back-btn">← Dashboard</a>
+  </div>
+
+  <section class="tests-section">
+    <div class="section-title">📝 Available Tests</div>
+    <div class="tests-grid" id="testGrid">
+      <div class="empty">Loading...</div>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </section>
+</main>
+
+
+<div class="popup-overlay" id="testPopup">
+  <div class="popup-box">
+    <h3 id="popupTitle">Open Test</h3>
+    <p>Choose what you want to open.</p>
+    <div class="popup-actions">
+      <button class="popup-btn popup-start" onclick="startSelectedTest()">Start Test</button>
+      <button class="popup-btn popup-solution" onclick="openSelectedSolution()">Solution</button>
+      <button class="popup-btn popup-close" onclick="closeTestPopup()">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-section"><h4>RPrep</h4><p>Empowering future nurses.</p><div class="social-links"><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-youtube"></i></a><a href="#"><i class="fab fa-telegram"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a></div></div>
+    <div class="footer-section"><h4>Quick Links</h4><a href="index.html">Home</a><a href="dashboard.html">Dashboard</a><a href="subjects.html?subject=365-days-challenge">All Tests</a><a href="#">Leaderboard</a></div>
+    <div class="footer-section"><h4>Resources</h4><a href="#">Nursing Blog</a><a href="#">Study Tips</a><a href="#">Previous Papers</a><a href="#">Doubt Support</a></div>
+    <div class="footer-section"><h4>Support</h4><a href="#">Contact Us</a><a href="#">Privacy Policy</a><a href="#">Terms & Conditions</a><a href="#">FAQ</a></div>
+  </div>
+  <div class="copyright">© 2026 RPrep - Your Nursing Success Partner. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js">
+let selectedTestNo = null;
+
+function openTestPopup(testNo){
+ selectedTestNo = testNo;
+ document.getElementById("popupTitle").innerText = "Test " + testNo;
+ document.getElementById("testPopup").style.display = "flex";
+}
+
+function closeTestPopup(){
+ document.getElementById("testPopup").style.display = "none";
+}
+
+function startSelectedTest(){
+ if(!selectedTestNo) return;
+ location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo;
+}
+
+async function openSelectedSolution(){
+ if(!selectedTestNo) return;
+
+ try{
+   const user = auth.currentUser;
+   if(!user){
+     alert("Please login first.");
+     return;
+   }
+
+   const docId = subject + "_test_" + selectedTestNo;
+   const resultDoc = await db.collection("users")
+     .doc(user.uid)
+     .collection("subject_results")
+     .doc(docId)
+     .get();
+
+   if(resultDoc.exists){
+     location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo + "&mode=solution";
+   }else{
+     alert("Solution locked. Pehle test submit karo.");
+   }
+ }catch(e){
+   console.log(e);
+   alert("Solution check nahi ho pa raha. Firebase rules/internet check karo.");
+ }
+}
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js">
+let selectedTestNo = null;
+
+function openTestPopup(testNo){
+ selectedTestNo = testNo;
+ document.getElementById("popupTitle").innerText = "Test " + testNo;
+ document.getElementById("testPopup").style.display = "flex";
+}
+
+function closeTestPopup(){
+ document.getElementById("testPopup").style.display = "none";
+}
+
+function startSelectedTest(){
+ if(!selectedTestNo) return;
+ location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo;
+}
+
+async function openSelectedSolution(){
+ if(!selectedTestNo) return;
+
+ try{
+   const user = auth.currentUser;
+   if(!user){
+     alert("Please login first.");
+     return;
+   }
+
+   const docId = subject + "_test_" + selectedTestNo;
+   const resultDoc = await db.collection("users")
+     .doc(user.uid)
+     .collection("subject_results")
+     .doc(docId)
+     .get();
+
+   if(resultDoc.exists){
+     location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo + "&mode=solution";
+   }else{
+     alert("Solution locked. Pehle test submit karo.");
+   }
+ }catch(e){
+   console.log(e);
+   alert("Solution check nahi ho pa raha. Firebase rules/internet check karo.");
+ }
+}
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js">
+let selectedTestNo = null;
+
+function openTestPopup(testNo){
+ selectedTestNo = testNo;
+ document.getElementById("popupTitle").innerText = "Test " + testNo;
+ document.getElementById("testPopup").style.display = "flex";
+}
+
+function closeTestPopup(){
+ document.getElementById("testPopup").style.display = "none";
+}
+
+function startSelectedTest(){
+ if(!selectedTestNo) return;
+ location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo;
+}
+
+async function openSelectedSolution(){
+ if(!selectedTestNo) return;
+
+ try{
+   const user = auth.currentUser;
+   if(!user){
+     alert("Please login first.");
+     return;
+   }
+
+   const docId = subject + "_test_" + selectedTestNo;
+   const resultDoc = await db.collection("users")
+     .doc(user.uid)
+     .collection("subject_results")
+     .doc(docId)
+     .get();
+
+   if(resultDoc.exists){
+     location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo + "&mode=solution";
+   }else{
+     alert("Solution locked. Pehle test submit karo.");
+   }
+ }catch(e){
+   console.log(e);
+   alert("Solution check nahi ho pa raha. Firebase rules/internet check karo.");
+ }
+}
+
+</script>
+<script src="firebase-config.js">
+let selectedTestNo = null;
+
+function openTestPopup(testNo){
+ selectedTestNo = testNo;
+ document.getElementById("popupTitle").innerText = "Test " + testNo;
+ document.getElementById("testPopup").style.display = "flex";
+}
+
+function closeTestPopup(){
+ document.getElementById("testPopup").style.display = "none";
+}
+
+function startSelectedTest(){
+ if(!selectedTestNo) return;
+ location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo;
+}
+
+async function openSelectedSolution(){
+ if(!selectedTestNo) return;
+
+ try{
+   const user = auth.currentUser;
+   if(!user){
+     alert("Please login first.");
+     return;
+   }
+
+   const docId = subject + "_test_" + selectedTestNo;
+   const resultDoc = await db.collection("users")
+     .doc(user.uid)
+     .collection("subject_results")
+     .doc(docId)
+     .get();
+
+   if(resultDoc.exists){
+     location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo + "&mode=solution";
+   }else{
+     alert("Solution locked. Pehle test submit karo.");
+   }
+ }catch(e){
+   console.log(e);
+   alert("Solution check nahi ho pa raha. Firebase rules/internet check karo.");
+ }
+}
+
+</script>
+
+<script>
+function toggleMenu(){document.getElementById('navLinks').classList.toggle('show')}
+function logout(){auth.signOut().then(()=>window.location.href='index.html')}
+
+const params = new URLSearchParams(window.location.search);
+const subject = params.get("subject") || "medical-surgical-nursing";
+const isDaily = subject === "365-days-challenge";
+const PAGE_SIZE = 10;
+let allTests = [];
+let currentPage = parseInt(params.get("page") || "1");
+
+const subjectNames = {
+ "365-days-challenge":"365 Days Challenge",
+ "medical-surgical-nursing":"Medical Surgical Nursing",
+ "obstetrics-and-gynaecology":"Obstetrics & Gynaecology",
+ "pediatric-nursing":"Pediatric Nursing",
+ "mental-health-nursing":"Mental Health Nursing",
+ "community-health-nursing":"Community Health Nursing",
+ "nursing-management":"Nursing Management",
+ "anatomy-and-physiology":"Anatomy & Physiology",
+ "pharmacology":"Pharmacology",
+ "microbiology":"Microbiology",
+ "research-and-statistics":"Research & Statistics",
+ "nursing-foundation":"Nursing Foundation",
+ "nutrition":"Nutrition",
+ "biochemistry":"Biochemistry",
+ "pathology":"Pathology",
+ "infection-control":"Infection Control",
+ "first-aid-and-emergency":"First Aid & Emergency"
+};
+
+document.getElementById("subjectTitle").innerText = subjectNames[subject] || subject;
+
+auth.onAuthStateChanged(user=>{
+ if(!user){window.location.href='index.html';return}
+ loadTests(user);
+});
+
+async function loadTests(user){
+ const cacheKey = "rprep_tests_" + subject;
+ const cached = localStorage.getItem(cacheKey);
+
+ if(cached){
+   try{ renderTests(JSON.parse(cached), true); }catch(e){}
+ }
+
+ try{
+   let tests = [];
+
+   if(isDaily){
+     const snap = await db.collection("tests").get();
+     snap.forEach(doc=>{
+       const d = doc.data();
+       tests.push({
+         id: doc.id,
+         day: d.day,
+         title: "Day " + d.day + " Test",
+         total: d.total_questions || 100,
+         time: d.time_limit || 60,
+         focus: d.subject_focus || "Mixed"
+       });
+     });
+   }else{
+     const snap = await db.collection("subject_tests")
+       .where("subject_id","==",subject)
+       .orderBy("test_number","asc")
+       .get();
+
+     snap.forEach(doc=>{
+       const d = doc.data();
+       tests.push({
+         id: doc.id,
+         test_number: d.test_number,
+         title: "Test " + d.test_number,
+         total: d.total_questions || (d.questions ? d.questions.length : 100),
+         time: d.time_limit || 60,
+         focus: d.topic || subjectNames[subject] || "Subject Test"
+       });
+     });
+   }
+
+   localStorage.setItem(cacheKey, JSON.stringify(tests));
+   renderTests(tests, false);
+
+ }catch(e){
+   console.log(e);
+   if(!cached){
+     document.getElementById("testGrid").innerHTML =
+       '<div class="empty">Tests load nahi ho pa rahe. Firebase rules ya internet check karo.</div>';
+   }
+ }
+}
+
+function renderTests(tests, fromCache){
+ allTests = tests || [];
+ const grid = document.getElementById("testGrid");
+ const pagination = document.getElementById("pagination");
+ grid.innerHTML = "";
+ pagination.innerHTML = "";
+
+ const totalPages = Math.max(1, Math.ceil(allTests.length / PAGE_SIZE));
+ if(currentPage > totalPages) currentPage = totalPages;
+ if(currentPage < 1) currentPage = 1;
+
+ document.getElementById("subjectInfo").innerText =
+   (fromCache ? "Cached tests shown · " : "") +
+   allTests.length + " tests available · Page " + currentPage + "/" + totalPages;
+
+ if(!allTests.length){
+   grid.innerHTML = '<div class="empty">No tests uploaded yet.</div>';
+   return;
+ }
+
+ const startIndex = (currentPage - 1) * PAGE_SIZE;
+ const pageTests = allTests.slice(startIndex, startIndex + PAGE_SIZE);
+
+ pageTests.forEach(t=>{
+   const card = document.createElement("div");
+   card.className = "test-card";
+
+   if(isDaily){
+     card.onclick = ()=> location.href = "test-page.html?day=" + t.day;
+     card.innerHTML = `
+       <div>
+         <div class="test-name">${t.title}</div>
+         <div class="test-meta">${t.total} Questions · ${t.time} min · ${t.focus}</div>
+       </div>
+       <div class="test-badge">D${t.day}</div>`;
+   }else{
+     card.onclick = ()=> openTestPopup(t.test_number);
+     card.innerHTML = `
+       <div>
+         <div class="test-name">${t.title}</div>
+         <div class="test-meta">${t.total} Questions · ${t.time} min · ${t.focus}</div>
+       </div>
+       <div class="test-badge">#${t.test_number}</div>`;
+   }
+
+   grid.appendChild(card);
+ });
+
+ renderPagination(totalPages);
+}
+
+function renderPagination(totalPages){
+ const pagination = document.getElementById("pagination");
+ if(totalPages <= 1) return;
+
+ const makeBtn = (text, page, disabled=false, active=false) => {
+   const btn = document.createElement("button");
+   btn.className = "page-btn" + (active ? " active" : "");
+   btn.textContent = text;
+   btn.disabled = disabled;
+   btn.onclick = () => {
+     currentPage = page;
+     const url = new URL(window.location.href);
+     url.searchParams.set("page", currentPage);
+     history.replaceState(null, "", url.toString());
+     renderTests(allTests, true);
+     window.scrollTo({top:0, behavior:"smooth"});
+   };
+   pagination.appendChild(btn);
+ };
+
+ makeBtn("Prev", currentPage - 1, currentPage === 1);
+
+ let start = Math.max(1, currentPage - 2);
+ let end = Math.min(totalPages, start + 4);
+ start = Math.max(1, end - 4);
+
+ for(let i=start; i<=end; i++){
+   makeBtn(String(i), i, false, i === currentPage);
+ }
+
+ makeBtn("Next", currentPage + 1, currentPage === totalPages);
+}
+
+
+let selectedTestNo = null;
+
+function openTestPopup(testNo){
+ selectedTestNo = testNo;
+ document.getElementById("popupTitle").innerText = "Test " + testNo;
+ document.getElementById("testPopup").style.display = "flex";
+}
+
+function closeTestPopup(){
+ document.getElementById("testPopup").style.display = "none";
+}
+
+function startSelectedTest(){
+ if(!selectedTestNo) return;
+ location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo;
+}
+
+async function openSelectedSolution(){
+ if(!selectedTestNo) return;
+
+ try{
+   const user = auth.currentUser;
+   if(!user){
+     alert("Please login first.");
+     return;
+   }
+
+   const docId = subject + "_test_" + selectedTestNo;
+   const resultDoc = await db.collection("users")
+     .doc(user.uid)
+     .collection("subject_results")
+     .doc(docId)
+     .get();
+
+   if(resultDoc.exists){
+     location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo + "&mode=solution";
+   }else{
+     alert("Solution locked. Pehle test submit karo.");
+   }
+ }catch(e){
+   console.log(e);
+   alert("Solution check nahi ho pa raha. Firebase rules/internet check karo.");
+ }
+}
+
+</script>
+</body>
+</html>
+<script>
+localStorage.removeItem("rprep_tests_365-days-challenge");
+
+let selectedTestNo = null;
+
+function openTestPopup(testNo){
+ selectedTestNo = testNo;
+ document.getElementById("popupTitle").innerText = "Test " + testNo;
+ document.getElementById("testPopup").style.display = "flex";
+}
+
+function closeTestPopup(){
+ document.getElementById("testPopup").style.display = "none";
+}
+
+function startSelectedTest(){
+ if(!selectedTestNo) return;
+ location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo;
+}
+
+async function openSelectedSolution(){
+ if(!selectedTestNo) return;
+
+ try{
+   const user = auth.currentUser;
+   if(!user){
+     alert("Please login first.");
+     return;
+   }
+
+   const docId = subject + "_test_" + selectedTestNo;
+   const resultDoc = await db.collection("users")
+     .doc(user.uid)
+     .collection("subject_results")
+     .doc(docId)
+     .get();
+
+   if(resultDoc.exists){
+     location.href = "subject-test.html?subject=" + subject + "&test=" + selectedTestNo + "&mode=solution";
+   }else{
+     alert("Solution locked. Pehle test submit karo.");
+   }
+ }catch(e){
+   console.log(e);
+   alert("Solution check nahi ho pa raha. Firebase rules/internet check karo.");
+ }
+}
+
+</script>
