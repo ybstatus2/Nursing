@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sign Up - RPrep Nursing Exam Prep</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .signup-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+        
+        .signup-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .signup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .signup-header .logo-icon {
+            font-size: 3rem;
+        }
+        
+        .signup-header h2 {
+            font-size: 1.8rem;
+            color: #1e3c72;
+            margin-top: 0.5rem;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 1rem;
+            font-size: 1rem;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+        
+        .signup-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+        }
+        
+        .login-link a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .error-msg {
+            background: #fee;
+            color: #e74c3c;
+            padding: 0.8rem;
+            border-radius: 0.8rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #e74c3c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="signup-header">
+                <div class="logo-icon">🩺</div>
+                <h2>Create Account</h2>
+                <p>Start your nursing journey with RPrep</p>
+            </div>
+            
+            <div id="errorMsg" class="error-msg"></div>
+            
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Full Name</label>
+                <input type="text" id="name" placeholder="Enter your full name">
+            </div>
+            
+            <div class="input-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
+            
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="password" placeholder="Create a password (min 6 characters)">
+            </div>
+            
+            <button class="signup-btn" onclick="signup()">Sign Up →</button>
+            
+            <div id="loader" class="loader">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        function signup() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if(!name || !email || !password) {
+                showError('Please fill all fields');
+                return;
+            }
+            
+            if(password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+            
+            document.getElementById('loader').style.display = 'block';
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // Save user data to Firestore
+                    return db.collection('users').doc(user.uid).set({
+                        name: name,
+                        email: email,
+                        createdAt: new Date().toISOString(),
+                        totalMCQs: 0,
+                        accuracy: 0,
+                        streak: 0
+                    });
+                })
+                .then(() => {
+                    window.location.href = 'dashboard.html';
+                })
+                .catch((error) => {
+                    document.getElementById('loader').style.display = 'none';
+                    let errorMsg = error.message;
+                    if(errorMsg.includes('email-already-in-use')) {
+                        errorMsg = 'Email already registered. Please login.';
+                    }
+                    showError(errorMsg);
+                });
+        }
+        
+        // Check if already logged in
+        auth.onAuthStateChanged((user) => {
+            if(user) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>
