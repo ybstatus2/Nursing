@@ -8,7 +8,192 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Dashboard Specific Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fef9f0 0%, #fff5e6 100%);
+        }
+        
+        /* Premium Header */
+        .header {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            width: 100%;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e3c72, #2a5298, #e74c3c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .logo p {
+            font-size: 0.7rem;
+            color: #e74c3c;
+        }
+        
+        /* Stylish Dropdown Menu */
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #e74c3c;
+        }
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-btn {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .dropdown-btn:hover {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            transform: translateY(-2px);
+        }
+        
+        .dropdown-btn i {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        
+        .dropdown:hover .dropdown-btn i {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 260px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-radius: 1rem;
+            z-index: 1000;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .dropdown-content a i {
+            width: 24px;
+            font-size: 1.1rem;
+            color: #e74c3c;
+        }
+        
+        .dropdown-content a:hover {
+            background: #f8f9fc;
+            border-left-color: #e74c3c;
+            padding-left: 25px;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        /* Dashboard Container */
         .dashboard-container {
             max-width: 1200px;
             margin: 2rem auto;
@@ -38,10 +223,6 @@
         .welcome-banner h2 {
             font-size: 1.8rem;
             margin-bottom: 0.5rem;
-        }
-        
-        .welcome-banner p {
-            opacity: 0.9;
         }
         
         .streak-badge {
@@ -143,8 +324,8 @@
         }
         
         .test-number {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -189,7 +370,6 @@
         .start-test-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
-            transform: none;
         }
         
         /* Recent Tests */
@@ -214,86 +394,70 @@
             border-bottom: none;
         }
         
-        .recent-test-name {
-            font-weight: 500;
-        }
-        
         .recent-test-score {
             color: #e74c3c;
             font-weight: 600;
         }
         
-        /* Dropdown Menu */
-        .dropdown {
-            position: relative;
-            display: inline-block;
+        /* Footer */
+        .footer {
+            background: #1a1a2e;
+            color: #ccc;
+            margin-top: 3rem;
         }
         
-        .dropdown-btn {
-            background: transparent;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            color: #333;
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
         }
         
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background: white;
-            min-width: 200px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            border-radius: 1rem;
-            z-index: 1;
-            right: 0;
+        .footer-section h4 {
+            color: white;
+            margin-bottom: 1rem;
         }
         
-        .dropdown-content a {
-            color: #333;
-            padding: 12px 16px;
+        .footer-section a {
+            display: block;
+            color: #aaa;
             text-decoration: none;
-            display: block;
-            transition: background 0.3s;
-            border-radius: 1rem;
+            margin: 0.5rem 0;
         }
         
-        .dropdown-content a:hover {
-            background: #f0f2f5;
+        .footer-section a:hover {
             color: #e74c3c;
         }
         
-        .dropdown:hover .dropdown-content {
-            display: block;
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
         }
         
-        .logout-btn {
-            background: transparent;
-            border: none;
-            color: #e74c3c;
-            cursor: pointer;
-            font-weight: 500;
+        .social-links a {
+            background: #333;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        /* Responsive */
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 0 1rem;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .test-number {
-                width: 50px;
-                height: 50px;
-            }
+        .copyright {
+            text-align: center;
+            padding: 1.5rem;
+            border-top: 1px solid #333;
         }
         
-        /* Loading Spinner */
         .loading-container {
             text-align: center;
             padding: 4rem;
         }
+        
         .spinner {
             width: 50px;
             height: 50px;
@@ -303,14 +467,33 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
         }
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            .nav-links {
+                justify-content: center;
+            }
+            .dashboard-container {
+                padding: 0 1rem;
+            }
+            .test-number {
+                width: 55px;
+                height: 55px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- HEADER -->
+    <!-- PREMIUM HEADER WITH STYLISH DROPDOWN -->
     <header class="header">
         <div class="nav-container">
             <div class="logo">
@@ -321,20 +504,44 @@
                 </div>
             </div>
             <div class="nav-links">
-                <a href="index.html">Home</a>
+                <a href="index.html">🏠 Home</a>
+                
+                <!-- Stylish Dropdown -->
                 <div class="dropdown">
-                    <button class="dropdown-btn">Features <i class="fas fa-chevron-down"></i></button>
+                    <button class="dropdown-btn">
+                        <i class="fas fa-bars"></i> Features <i class="fas fa-chevron-down"></i>
+                    </button>
                     <div class="dropdown-content">
-                        <a href="dashboard.html">📊 Dashboard</a>
-                        <a href="#subjects">📚 Subjects</a>
-                        <a href="#tests">🎯 All Tests</a>
-                        <a href="#leaderboard">🏆 Leaderboard</a>
-                        <a href="#scorecard">📈 My Scorecards</a>
-                        <a href="#search">🔍 Search MCQs</a>
-                        <a href="#doubt">❓ Doubt Section</a>
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i> 📊 Dashboard
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-book"></i> 📚 All Subjects
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-tasks"></i> 🎯 All Tests
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-trophy"></i> 🏆 Leaderboard
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-chart-line"></i> 📈 My Scorecards
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-search"></i> 🔍 Search MCQs
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-question-circle"></i> ❓ Doubt Section
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-headset"></i> 🆘 Support
+                        </a>
                     </div>
                 </div>
-                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </div>
     </header>
@@ -395,12 +602,10 @@
         let currentUser = null;
         let userData = null;
         
-        // Test numbers (1 to 20)
         const testNumbers = Array.from({length: 20}, (_, i) => i + 1);
         let selectedTest = null;
         let selectedSubject = null;
         
-        // Check authentication
         auth.onAuthStateChanged(async (user) => {
             if(!user) {
                 window.location.href = 'login.html';
@@ -409,13 +614,12 @@
             
             currentUser = user;
             
-            // Load user data from Firestore
             const userDoc = await db.collection('users').doc(user.uid).get();
             if(userDoc.exists) {
                 userData = userDoc.data();
             } else {
                 userData = {
-                    name: user.email.split('@')[0],
+                    name: user.email ? user.email.split('@')[0] : 'Student',
                     totalMCQs: 0,
                     accuracy: 0,
                     streak: 0
@@ -430,16 +634,14 @@
             
             mainContent.innerHTML = `
                 <div class="dashboard-container">
-                    <!-- Welcome Banner -->
                     <div class="welcome-banner">
-                        <h2>Welcome back, ${userData.name || 'Nursing Warrior'}! 👩‍⚕️</h2>
+                        <h2>Welcome back, ${userData.name || 'Student'}! <span style="font-size:2rem;">😊</span></h2>
                         <p>You're doing great! Let's continue your journey to success.</p>
                         <div class="streak-badge">
-                            <i class="fas fa-fire"></i> ${userData.streak || 0} Day Streak! Keep going! 🔥
+                            <i class="fas fa-fire"></i> ${userData.streak || 0} Day Streak! Keep going! 🏆
                         </div>
                     </div>
 
-                    <!-- Stats Grid -->
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">📚</div>
@@ -463,7 +665,6 @@
                         </div>
                     </div>
 
-                    <!-- Selection Card -->
                     <div class="selection-card">
                         <div class="selection-title">📖 Select Subject & Test</div>
                         
@@ -489,29 +690,27 @@
                         </button>
                     </div>
 
-                    <!-- Motivation Quote -->
                     <div class="selection-card" style="background: linear-gradient(135deg, #fef9f0, #fff5e6);">
-                        <div class="quote-icon" style="text-align: center; font-size: 2rem;">💬</div>
-                        <div class="quote-text" style="text-align: center; font-size: 1.1rem;">
+                        <div style="text-align: center; font-size: 2rem;">💬</div>
+                        <div style="text-align: center; font-size: 1.1rem; font-style: italic;">
                             "The beautiful thing about learning is that no one can take it away from you."
                         </div>
-                        <div class="quote-author" style="text-align: center;">— B.B. King</div>
+                        <div style="text-align: center; font-weight: 600; margin-top: 1rem;">— B.B. King</div>
                     </div>
 
-                    <!-- Recent Tests -->
                     <div class="recent-tests">
                         <h3 style="margin-bottom: 1rem;"><i class="fas fa-history"></i> Recent Tests</h3>
                         <div id="recentTestsList">
                             <div class="recent-test-item">
-                                <span class="recent-test-name">Medical Surgical Nursing - Quiz 1</span>
+                                <span>Medical Surgical Nursing - Quiz 1</span>
                                 <span class="recent-test-score">18/20 (90%)</span>
                             </div>
                             <div class="recent-test-item">
-                                <span class="recent-test-name">NORCET Mock Test 3</span>
+                                <span>NORCET Mock Test 3</span>
                                 <span class="recent-test-score">65/100 (65%)</span>
                             </div>
                             <div class="recent-test-item">
-                                <span class="recent-test-name">Pediatric Nursing - Quiz 2</span>
+                                <span>Pediatric Nursing - Quiz 2</span>
                                 <span class="recent-test-score">15/20 (75%)</span>
                             </div>
                         </div>
@@ -519,7 +718,6 @@
                 </div>
             `;
             
-            // Add event listeners
             const subjectSelect = document.getElementById('subjectSelect');
             const testScroller = document.getElementById('testScroller');
             const testNumbersDiv = document.getElementById('testNumbers');
@@ -542,7 +740,6 @@
                     startTestBtn.textContent = '🚀 Select a test number first';
                 } else {
                     testScroller.style.display = 'none';
-                    selectedTest = null;
                     startTestBtn.disabled = true;
                 }
             });
@@ -565,13 +762,11 @@
                 }
             });
             
-            // Load recent tests from Firestore
             loadRecentTests();
         }
         
         async function loadRecentTests() {
             if(!currentUser) return;
-            
             try {
                 const testsSnapshot = await db.collection('tests')
                     .where('userId', '==', currentUser.uid)
@@ -586,14 +781,14 @@
                         const test = doc.data();
                         recentTestsDiv.innerHTML += `
                             <div class="recent-test-item">
-                                <span class="recent-test-name">${test.subject} - ${test.testName || 'Test'}</span>
+                                <span>${test.subject || 'Nursing'} - ${test.testName || 'Test'}</span>
                                 <span class="recent-test-score">${test.score}/${test.total} (${Math.round((test.score/test.total)*100)}%)</span>
                             </div>
                         `;
                     });
                 }
             } catch(e) {
-                console.log("Error loading recent tests:", e);
+                console.log("Error:", e);
             }
         }
         
