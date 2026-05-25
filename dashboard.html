@@ -19,7 +19,6 @@
             background: linear-gradient(135deg, #fef9f0 0%, #fff5e6 100%);
         }
         
-        /* Premium Header */
         .header {
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(10px);
@@ -71,7 +70,6 @@
             color: #e74c3c;
         }
         
-        /* Stylish Dropdown Menu */
         .nav-links {
             display: flex;
             gap: 1.5rem;
@@ -90,6 +88,7 @@
             color: #e74c3c;
         }
         
+        /* Dropdown Styles */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -115,15 +114,6 @@
             transform: translateY(-2px);
         }
         
-        .dropdown-btn i {
-            font-size: 0.8rem;
-            transition: transform 0.3s;
-        }
-        
-        .dropdown:hover .dropdown-btn i {
-            transform: rotate(180deg);
-        }
-        
         .dropdown-content {
             display: none;
             position: absolute;
@@ -136,22 +126,6 @@
             z-index: 1000;
             margin-top: 0.5rem;
             overflow: hidden;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .dropdown:hover .dropdown-content {
-            display: block;
         }
         
         .dropdown-content a {
@@ -177,6 +151,11 @@
             padding-left: 25px;
         }
         
+        /* Show dropdown on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
         .logout-btn {
             background: transparent;
             border: 2px solid #e74c3c;
@@ -193,14 +172,12 @@
             color: white;
         }
         
-        /* Dashboard Container */
         .dashboard-container {
             max-width: 1200px;
             margin: 2rem auto;
             padding: 0 2rem;
         }
         
-        /* Welcome Banner */
         .welcome-banner {
             background: linear-gradient(135deg, #1e3c72, #2a5298);
             border-radius: 1.5rem;
@@ -234,7 +211,6 @@
             margin-top: 1rem;
         }
         
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -271,7 +247,6 @@
             font-size: 0.85rem;
         }
         
-        /* Selection Card */
         .selection-card {
             background: white;
             border-radius: 1.5rem;
@@ -305,11 +280,6 @@
         
         .test-scroller {
             margin: 1.5rem 0;
-        }
-        
-        .test-scroller h4 {
-            margin-bottom: 1rem;
-            color: #333;
         }
         
         .test-numbers {
@@ -372,7 +342,6 @@
             cursor: not-allowed;
         }
         
-        /* Recent Tests */
         .recent-tests {
             background: white;
             border-radius: 1.5rem;
@@ -399,7 +368,6 @@
             font-weight: 600;
         }
         
-        /* Footer */
         .footer {
             background: #1a1a2e;
             color: #ccc;
@@ -493,7 +461,6 @@
 </head>
 <body>
 
-    <!-- PREMIUM HEADER WITH STYLISH DROPDOWN -->
     <header class="header">
         <div class="nav-container">
             <div class="logo">
@@ -506,36 +473,19 @@
             <div class="nav-links">
                 <a href="index.html">🏠 Home</a>
                 
-                <!-- Stylish Dropdown -->
                 <div class="dropdown">
-                    <button class="dropdown-btn">
+                    <button class="dropdown-btn" id="dropdownBtn">
                         <i class="fas fa-bars"></i> Features <i class="fas fa-chevron-down"></i>
                     </button>
-                    <div class="dropdown-content">
-                        <a href="dashboard.html">
-                            <i class="fas fa-tachometer-alt"></i> 📊 Dashboard
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-book"></i> 📚 All Subjects
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-tasks"></i> 🎯 All Tests
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-trophy"></i> 🏆 Leaderboard
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-chart-line"></i> 📈 My Scorecards
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-search"></i> 🔍 Search MCQs
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-question-circle"></i> ❓ Doubt Section
-                        </a>
-                        <a href="#">
-                            <i class="fas fa-headset"></i> 🆘 Support
-                        </a>
+                    <div class="dropdown-content" id="dropdownContent">
+                        <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> 📊 Dashboard</a>
+                        <a href="#"><i class="fas fa-book"></i> 📚 All Subjects</a>
+                        <a href="#"><i class="fas fa-tasks"></i> 🎯 All Tests</a>
+                        <a href="#"><i class="fas fa-trophy"></i> 🏆 Leaderboard</a>
+                        <a href="#"><i class="fas fa-chart-line"></i> 📈 My Scorecards</a>
+                        <a href="#"><i class="fas fa-search"></i> 🔍 Search MCQs</a>
+                        <a href="#"><i class="fas fa-question-circle"></i> ❓ Doubt Section</a>
+                        <a href="#"><i class="fas fa-headset"></i> 🆘 Support</a>
                     </div>
                 </div>
                 
@@ -553,7 +503,6 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -599,6 +548,29 @@
     <script src="firebase-config.js"></script>
     
     <script>
+        // Dropdown click handler for mobile/tablet
+        const dropdownBtn = document.getElementById('dropdownBtn');
+        const dropdownContent = document.getElementById('dropdownContent');
+        let dropdownOpen = false;
+        
+        if(dropdownBtn) {
+            dropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownOpen = !dropdownOpen;
+                if(dropdownOpen) {
+                    dropdownContent.style.display = 'block';
+                } else {
+                    dropdownContent.style.display = 'none';
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                dropdownContent.style.display = 'none';
+                dropdownOpen = false;
+            });
+        }
+        
         let currentUser = null;
         let userData = null;
         

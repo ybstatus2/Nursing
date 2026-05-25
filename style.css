@@ -839,3 +839,86 @@ body, html {
         height: 40px;
     }
 }
+
+/* ---------- STYLISH DROPDOWN MENU (Click + Hover Both) ---------- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.dropdown-btn:hover {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    transform: translateY(-2px);
+}
+
+.dropdown-btn i {
+    font-size: 0.8rem;
+    transition: transform 0.3s;
+}
+
+.dropdown.active .dropdown-btn i {
+    transform: rotate(180deg);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    min-width: 260px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    border-radius: 1rem;
+    z-index: 1000;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 12px 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.dropdown-content a i {
+    width: 24px;
+    font-size: 1.1rem;
+    color: #e74c3c;
+}
+
+.dropdown-content a:hover {
+    background: #f8f9fc;
+    border-left-color: #e74c3c;
+    padding-left: 25px;
+}
+
+/* Show dropdown on hover (desktop) */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Show dropdown on click (mobile/tablet) */
+.dropdown.show .dropdown-content {
+    display: block;
+}
+
