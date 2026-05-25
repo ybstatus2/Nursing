@@ -64,11 +64,11 @@ let questions=[],current=0,answers={},marked={},visited={},timer=3600,interval=n
 const KEY="rprep_cbt_"+subject+"_test_"+testNo;
 
 function isMobileDevice(){
- return window.innerWidth <= 900;
+ return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
 }
 
 function isLandscapeMode(){
- return window.innerWidth > window.innerHeight;
+ return window.matchMedia("(orientation: landscape)").matches;
 }
 
 function showLandscapeWarning(){
