@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms & Conditions - RPrep</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#fef9f0 0%,#fff5e6 100%);color:#1a1a2e}
+.header{background:rgba(255,255,255,.96);backdrop-filter:blur(20px);position:sticky;top:0;z-index:1000;box-shadow:0 2px 20px rgba(0,0,0,.05);padding:1rem 2rem}
+.nav-container{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.logo{display:flex;align-items:center;gap:.5rem}
+.logo h1{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#1e3c72,#2a5298,#e74c3c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo p{font-size:.7rem;color:#e74c3c}
+.nav-links{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}
+.nav-links a{text-decoration:none;color:#333;font-weight:500}
+.nav-links a:hover{color:#e74c3c}
+.logout-btn{background:transparent;border:2px solid #e74c3c;color:#e74c3c;padding:.5rem 1.2rem;border-radius:50px;cursor:pointer;font-weight:600}
+.logout-btn:hover{background:#e74c3c;color:white}
+.menu-btn{display:none;font-size:1.8rem;background:none;border:none;cursor:pointer}
+.page{max-width:1000px;margin:2rem auto;padding:0 2rem}
+.card{background:white;border-radius:1.5rem;padding:2rem;box-shadow:0 10px 30px rgba(0,0,0,.05)}
+.card h2{color:#1e3c72;font-size:1.8rem;margin-bottom:1rem}
+.card h3{color:#1e3c72;margin:1.2rem 0 .5rem}
+.card p,.card li{color:#555;line-height:1.8;font-size:.95rem}
+.card ul{padding-left:1.2rem}
+.back-btn{display:inline-block;background:#1e3c72;color:white;text-decoration:none;padding:.75rem 1.3rem;border-radius:50px;font-weight:700;margin-top:1.5rem}
+.footer{background:#1a1a2e;color:#ccc;margin-top:3rem;padding:2rem 2rem 1rem}
+.footer-content{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem}
+.footer-section h4{color:white;margin-bottom:1rem;font-size:1rem}
+.footer-section a{display:block;color:#aaa;text-decoration:none;margin:.5rem 0;font-size:.85rem}
+.footer-section a:hover{color:#e74c3c}
+.social-links{display:flex;gap:1rem;margin-top:1rem}
+.social-links a{background:#333;width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#aaa}
+.copyright{text-align:center;padding-top:2rem;margin-top:2rem;border-top:1px solid #333;font-size:.75rem}
+@media(max-width:768px){.menu-btn{display:block}.nav-links{display:none;width:100%;flex-direction:column;background:white;padding:1rem;border-radius:1rem;margin-top:1rem}.nav-links.show{display:flex}.page{padding:0 1rem}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="nav-container">
+    <div class="logo"><h1>RPrep</h1><p>Your Nursing Success Partner</p></div>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="subjects.html?subject=365-days-challenge">Subjects</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="scorecard.html">Scorecards</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <section class="card">
+
+<h2>📄 Terms & Conditions</h2>
+<p>These Terms & Conditions explain the rules for using RPrep. By accessing this website, you agree to follow these terms. If you do not agree, please do not use the platform.</p>
+
+<h3>Purpose of RPrep</h3>
+<p>RPrep is an educational platform created for nursing students and exam aspirants. It provides practice tests, MCQs, scorecards, study support and exam preparation tools.</p>
+
+<h3>User Account</h3>
+<ul>
+<li>You are responsible for maintaining the confidentiality of your login details.</li>
+<li>You should not share your account with others.</li>
+<li>You must provide correct information when required.</li>
+<li>Any misuse of the platform may lead to restriction of access.</li>
+</ul>
+
+<h3>Educational Content</h3>
+<p>All questions, explanations, tests and study materials are provided for educational practice. We try to keep content accurate and useful, but we do not guarantee that every question will exactly match any real exam.</p>
+
+<h3>No Official Exam Guarantee</h3>
+<p>RPrep is not an official government exam website. Using RPrep does not guarantee selection, marks, rank or success in any examination. Students should also refer to official notifications, standard textbooks and exam guidelines.</p>
+
+<h3>Prohibited Use</h3>
+<ul>
+<li>Do not copy, sell, republish or distribute our content without permission.</li>
+<li>Do not attempt to hack, damage or overload the website.</li>
+<li>Do not use fake accounts or misuse test systems.</li>
+<li>Do not upload or share harmful, illegal or abusive content.</li>
+</ul>
+
+<h3>Results and Scorecards</h3>
+<p>Scorecards are generated based on your submitted answers. Technical issues, network errors or incomplete submissions may affect result display. We may improve or modify scorecard features over time.</p>
+
+<h3>Platform Changes</h3>
+<p>We may update, modify, restrict or remove any feature, page, test or content at any time for improvement, maintenance or security reasons.</p>
+
+<h3>Limitation of Liability</h3>
+<p>RPrep is provided for learning support. We are not responsible for exam results, academic decisions, technical interruptions, data loss caused by user-side issues, or third-party service problems.</p>
+
+<h3>Contact</h3>
+<p>For questions related to these Terms & Conditions, contact support@rprep.in.</p>
+
+    <a class="back-btn" href="dashboard.html">← Back to Dashboard</a>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-section"><h4>RPrep</h4><p>Empowering future nurses.</p><div class="social-links"><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-youtube"></i></a><a href="#"><i class="fab fa-telegram"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a></div></div>
+    <div class="footer-section"><h4>Quick Links</h4><a href="index.html">Home</a><a href="dashboard.html">Dashboard</a><a href="subjects.html?subject=365-days-challenge">All Tests</a><a href="leaderboard.html">Leaderboard</a></div>
+    <div class="footer-section"><h4>Resources</h4><a href="#">Nursing Blog</a><a href="#">Study Tips</a><a href="#">Previous Papers</a><a href="doubt.html">Doubt Support</a></div>
+    <div class="footer-section"><h4>Support</h4><a href="contact.html">Contact Us</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms & Conditions</a><a href="faq.html">FAQ</a></div>
+  </div>
+  <div class="copyright">© 2026 RPrep - Your Nursing Success Partner. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+function toggleMenu(){document.getElementById('navLinks').classList.toggle('show')}
+function logout(){auth.signOut().then(()=>window.location.href='index.html')}
+</script>
+</body>
+</html>
