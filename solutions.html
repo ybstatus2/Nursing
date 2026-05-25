@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Solutions - RPrep Nursing Exam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .solutions-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .solution-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .solution-card.correct {
+            border-left: 5px solid #2ecc71;
+        }
+
+        .solution-card.wrong {
+            border-left: 5px solid #e74c3c;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1e3c72;
+        }
+
+        .user-answer {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .user-answer.correct {
+            background: #2ecc7120;
+            color: #2ecc71;
+        }
+
+        .user-answer.wrong {
+            background: #e74c3c20;
+            color: #e74c3c;
+        }
+
+        .correct-answer {
+            color: #2ecc71;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .solutions-container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">🩺</span>
+                <div><h1>RPrep</h1><p>Your Nursing Success Partner</p></div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="solutionsContent">
+        <div class="solutions-container">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>Loading solutions...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🩺 RPrep</h4>
+                <p>Empowering future nurses.</p>
+            </div>
+        </div>
+        <div class="copyright">© 2026 RPrep - All rights reserved.</div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'login.html';
+            });
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const results = JSON.parse(sessionStorage.getItem('testResults') || '{}');
+            
+            if (!results.questions) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            const solutionsContent = document.getElementById('solutionsContent');
+            let solutionsHTML = `
+                <div class="solutions-container">
+                    <h2 style="margin-bottom:1.5rem;">📖 Question Solutions</h2>
+            `;
+            
+            results.questions.forEach((q, idx) => {
+                const isCorrect = results.userAnswers[idx] === q.correct;
+                const userAnswer = results.userAnswers[idx];
+                solutionsHTML += `
+                    <div class="solution-card ${isCorrect ? 'correct' : 'wrong'}">
+                        <div class="question-text">Q${idx + 1}. ${q.text}</div>
+                        <div class="user-answer ${isCorrect ? 'correct' : 'wrong'}">
+                            Your answer: ${userAnswer !== null ? 
+                                String.fromCharCode(65 + userAnswer) + '. ' + q.options[userAnswer] : 
+                                'Not answered'}
+                        </div>
+                        ${!isCorrect ? `
+                            <div class="correct-answer">
+                                ✓ Correct answer: ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            solutionsHTML += `
+                    <div style="text-align:center; margin-top:2rem; margin-bottom:2rem;">
+                        <a href="dashboard.html" style="background:#1e3c72; color:white; padding:0.8rem 1.5rem; border-radius:50px; text-decoration:none; display:inline-block;">
+                            ← Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            solutionsContent.innerHTML = solutionsHTML;
+        });
+    </script>
+</body>
+</html>
