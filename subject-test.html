@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Subject Test - RPrep</title>
+    <title>CBT Exam - RPrep</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -27,7 +27,7 @@
             background: #f0f2f5;
         }
 
-        /* ========== LANDSCAPE WARNING ========== */
+        /* LANDSCAPE WARNING */
         .rotate-warning {
             position: fixed;
             top: 0;
@@ -47,34 +47,20 @@
             padding: 20px;
         }
 
-        .rotate-warning .warning-inner {
-            max-width: 90%;
-            margin: 0 auto;
-        }
-
         .rotate-warning i {
             font-size: 60px;
             animation: rotateAnim 2s ease infinite;
-            display: inline-block;
         }
 
         .rotate-warning h2 {
             font-size: 22px;
             margin-top: 20px;
-            font-weight: 600;
         }
 
         .rotate-warning p {
             font-size: 14px;
             margin-top: 12px;
             opacity: 0.9;
-            line-height: 1.5;
-        }
-
-        .rotate-warning .small-note {
-            font-size: 11px;
-            margin-top: 20px;
-            opacity: 0.7;
         }
 
         @keyframes rotateAnim {
@@ -82,69 +68,56 @@
             50% { transform: rotate(90deg); }
         }
 
-        /* Portrait Mode - Show Warning */
         @media (orientation: portrait) {
-            .rotate-warning {
-                display: flex !important;
-            }
-            .exam-main-container {
-                display: none !important;
-            }
+            .rotate-warning { display: flex !important; }
+            .exam-container { display: none !important; }
         }
 
-        /* Landscape Mode - Hide Warning, Show Exam */
         @media (orientation: landscape) {
-            .rotate-warning {
-                display: none !important;
-            }
-            .exam-main-container {
-                display: block !important;
-            }
+            .rotate-warning { display: none !important; }
+            .exam-container { display: block !important; }
         }
 
-        /* ========== CBT EXAM STYLES ========== */
-        .exam-main-container {
+        /* CBT EXAM CONTAINER */
+        .exam-container {
             display: none;
             width: 100%;
             height: 100vh;
-            overflow: hidden;
             background: #f0f2f5;
         }
 
+        /* Header */
         .exam-header {
             background: #ffffff;
-            padding: 6px 16px;
+            padding: 8px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #e0e4e8;
-            height: 50px;
+            border-bottom: 2px solid #e0e4e8;
+            height: 56px;
         }
 
         .exam-title {
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             color: #1e3c72;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .exam-title span {
             color: #e74c3c;
         }
 
-        .timer-area {
+        .timer-box {
             background: #1e3c72;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 6px 16px;
+            border-radius: 30px;
             color: white;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 18px;
             font-family: monospace;
         }
 
-        .timer-area.warning {
+        .timer-box.warning {
             background: #e74c3c;
             animation: pulse 1s infinite;
         }
@@ -154,94 +127,94 @@
             50% { opacity: 0.7; }
         }
 
+        /* Main Content */
         .exam-main {
             display: flex;
-            padding: 8px;
-            gap: 8px;
-            height: calc(100vh - 50px);
-            overflow: hidden;
+            height: calc(100vh - 56px);
+            padding: 12px;
+            gap: 12px;
         }
 
-        .question-section {
+        /* Left Side - Question Area */
+        .question-area {
             flex: 3;
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .question-header {
             background: #f8f9fc;
-            padding: 8px 12px;
+            padding: 12px 20px;
             border-bottom: 1px solid #e0e4e8;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
         }
 
-        .q-num {
+        .q-number {
             font-weight: 700;
             color: #1e3c72;
-            font-size: 12px;
+            font-size: 14px;
         }
 
-        .q-num span {
+        .q-number span {
             background: #1e3c72;
             color: white;
-            padding: 2px 8px;
-            border-radius: 15px;
-            margin-right: 6px;
-            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-right: 10px;
         }
 
-        .mark-btn {
+        .mark-review-btn {
             background: #ffc10720;
             border: 1px solid #ffc107;
             color: #d4a000;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 10px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
         }
 
-        .mark-btn.marked {
+        .mark-review-btn.marked {
             background: #ffc107;
             color: #333;
         }
 
         .question-body {
             flex: 1;
-            padding: 12px;
+            padding: 24px;
             overflow-y: auto;
         }
 
         .question-text {
-            font-size: 14px;
+            font-size: 18px;
             font-weight: 600;
             color: #1a1a2e;
-            line-height: 1.4;
-            margin-bottom: 16px;
+            line-height: 1.5;
+            margin-bottom: 30px;
         }
 
-        .options-list {
+        .options {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 16px;
         }
 
         .option {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
+            gap: 15px;
+            padding: 14px 18px;
             background: #f8f9fc;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            border: 1px solid transparent;
+            border: 2px solid transparent;
+            transition: all 0.2s;
         }
 
         .option:hover {
@@ -254,16 +227,17 @@
         }
 
         .option-prefix {
-            width: 26px;
-            height: 26px;
+            width: 36px;
+            height: 36px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 16px;
             color: #1e3c72;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .option.selected .option-prefix {
@@ -273,83 +247,87 @@
 
         .option-text {
             flex: 1;
-            font-size: 12px;
+            font-size: 15px;
             color: #333;
         }
 
+        /* Navigation Buttons */
         .nav-buttons {
-            padding: 8px 12px;
+            padding: 16px 20px;
             border-top: 1px solid #e0e4e8;
             display: flex;
-            gap: 8px;
             justify-content: space-between;
             background: #f8f9fc;
         }
 
-        .cbt-btn {
-            padding: 6px 14px;
+        .nav-btn {
+            padding: 10px 24px;
             border: none;
-            border-radius: 20px;
+            border-radius: 30px;
             font-weight: 600;
-            font-size: 11px;
+            font-size: 14px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .btn-prev {
+        .prev-btn {
             background: #e0e0e0;
             color: #333;
         }
 
-        .btn-next {
+        .next-btn {
             background: #1e3c72;
             color: white;
         }
 
-        .btn-submit {
+        .submit-btn {
             background: #e74c3c;
             color: white;
         }
 
-        .btn-prev:disabled, .btn-next:disabled {
+        .prev-btn:disabled, .next-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
 
-        .palette-section {
+        /* Right Side - Palette Area */
+        .palette-area {
             flex: 1;
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            min-width: 180px;
+            min-width: 260px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .palette-header {
             background: #f8f9fc;
-            padding: 8px;
+            padding: 14px;
             text-align: center;
             font-weight: 700;
-            font-size: 11px;
+            font-size: 14px;
             color: #1e3c72;
             border-bottom: 1px solid #e0e4e8;
         }
 
         .palette-grid {
-            padding: 10px;
+            padding: 16px;
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
+            gap: 10px;
             overflow-y: auto;
         }
 
         .palette-btn {
             aspect-ratio: 1;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-weight: 700;
-            font-size: 11px;
+            font-size: 14px;
             cursor: pointer;
+            transition: all 0.15s;
             background: #f0f0f0;
             color: #333;
         }
@@ -368,6 +346,7 @@
             background: #1e3c72;
             color: white;
             transform: scale(1.05);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #1e3c72;
         }
 
         .palette-btn.not-answered {
@@ -376,28 +355,29 @@
         }
 
         .legend {
-            padding: 6px 10px;
+            padding: 12px 16px;
             border-top: 1px solid #e0e4e8;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 16px;
             justify-content: center;
-            font-size: 9px;
+            font-size: 11px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
         }
 
         .legend-color {
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
         }
 
-        .loading-container {
+        /* Loading */
+        .loading {
             position: fixed;
             top: 0;
             left: 0;
@@ -412,9 +392,9 @@
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e0e0e0;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
             border-top-color: #e74c3c;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -425,21 +405,19 @@
 </head>
 <body>
 
-    <!-- ROTATION WARNING -->
+    <!-- Warning for Portrait Mode -->
     <div class="rotate-warning">
-        <div class="warning-inner">
-            <i class="fas fa-rotate-right"></i>
-            <h2>Rotate Your Phone</h2>
-            <p>Please rotate your phone to <strong>Landscape / Horizontal Mode</strong><br>for the best CBT exam experience.</p>
-            <p class="small-note">ⓘ Test will start automatically after rotation</p>
-        </div>
+        <i class="fas fa-rotate-right"></i>
+        <h2>Rotate Your Device</h2>
+        <p>Please rotate to Landscape Mode for CBT Exam</p>
+        <p style="font-size: 12px; margin-top: 16px;">Exam will start automatically after rotation</p>
     </div>
 
-    <!-- MAIN EXAM CONTAINER -->
-    <div class="exam-main-container" id="examContent">
-        <div class="loading-container">
+    <!-- Main CBT Exam Container -->
+    <div class="exam-container" id="examContainer">
+        <div class="loading">
             <div class="spinner"></div>
-            <p style="margin-top: 12px;">Loading Subject Test...</p>
+            <p style="margin-top: 16px;">Loading Exam...</p>
         </div>
     </div>
 
@@ -450,54 +428,57 @@
     <script>
         let currentUser = null;
         let questions = [];
-        let currentIndex = 0;
         let userAnswers = [];
         let markedForReview = [];
+        let currentIndex = 0;
         let timer = null;
         let timeLeft = 0;
         
         const urlParams = new URLSearchParams(window.location.search);
-        const testSubject = urlParams.get('subject') || sessionStorage.getItem('testSubject') || 'Nursing';
-        const testId = urlParams.get('test') || sessionStorage.getItem('testId') || '1';
+        const subjectId = urlParams.get('subject') || sessionStorage.getItem('testSubject') || 'Medical Surgical Nursing';
+        const testNum = urlParams.get('test') || sessionStorage.getItem('testId') || '1';
         const testTopic = urlParams.get('topic') || sessionStorage.getItem('testTopic') || 'General';
         
         const storedQuestions = sessionStorage.getItem('testQuestions');
         if (storedQuestions) {
             questions = JSON.parse(storedQuestions);
         } else {
+            // Sample CBT Questions
             questions = [
-                { text: "A patient presents with chest pain radiating to left arm. What is the most likely diagnosis?", options: ["Angina Pectoris", "Myocardial Infarction", "Pericarditis", "GERD"], correct: 1 },
-                { text: "Which of the following is the first-line treatment for hypertension?", options: ["ACE Inhibitors", "Beta Blockers", "Calcium Channel Blockers", "Thiazide Diuretics"], correct: 3 },
-                { text: "Normal adult respiratory rate is:", options: ["8-12 breaths/min", "12-20 breaths/min", "20-28 breaths/min", "28-36 breaths/min"], correct: 1 },
-                { text: "Which artery is palpated to check pulse in an unconscious patient?", options: ["Radial", "Brachial", "Carotid", "Femoral"], correct: 2 },
-                { text: "The universal donor blood group is:", options: ["A", "B", "AB", "O"], correct: 3 }
+                { text: "A 55-year-old male presents with crushing chest pain radiating to left arm. ECG shows ST elevation. What is the most likely diagnosis?", options: ["Unstable Angina", "Myocardial Infarction", "Pericarditis", "Aortic Dissection"], correct: 1 },
+                { text: "Which of the following is the first-line medication for hypertension in diabetic patients?", options: ["ACE Inhibitors", "Beta Blockers", "Calcium Channel Blockers", "Thiazide Diuretics"], correct: 0 },
+                { text: "Normal adult respiratory rate range is:", options: ["8-12 breaths/min", "12-20 breaths/min", "20-28 breaths/min", "28-36 breaths/min"], correct: 1 },
+                { text: "The most common site for taking pulse in an unconscious patient is:", options: ["Radial artery", "Brachial artery", "Carotid artery", "Femoral artery"], correct: 2 },
+                { text: "Which blood group is known as universal donor?", options: ["A Positive", "B Positive", "AB Positive", "O Negative"], correct: 3 },
+                { text: "The normal adult heart rate range is:", options: ["40-60 bpm", "60-100 bpm", "80-120 bpm", "100-140 bpm"], correct: 1 },
+                { text: "Which of the following is a sign of hypoxia?", options: ["Bradycardia", "Hypotension", "Cyanosis", "Hyperventilation"], correct: 2 },
+                { text: "The drug of choice for cardiac arrest is:", options: ["Atropine", "Amiodarone", "Epinephrine", "Lidocaine"], correct: 2 }
             ];
         }
         
         userAnswers = new Array(questions.length).fill(null);
         markedForReview = new Array(questions.length).fill(false);
-        currentIndex = 0;
         timeLeft = questions.length * 75;
         
-        function saveToSession() {
-            sessionStorage.setItem('testUserAnswers', JSON.stringify(userAnswers));
-            sessionStorage.setItem('testMarkedForReview', JSON.stringify(markedForReview));
-            sessionStorage.setItem('testCurrentIndex', currentIndex);
-            sessionStorage.setItem('testTimeLeft', timeLeft);
+        function saveProgress() {
+            sessionStorage.setItem('cbt_userAnswers', JSON.stringify(userAnswers));
+            sessionStorage.setItem('cbt_markedForReview', JSON.stringify(markedForReview));
+            sessionStorage.setItem('cbt_currentIndex', currentIndex);
+            sessionStorage.setItem('cbt_timeLeft', timeLeft);
         }
         
-        function loadFromSession() {
-            const savedAnswers = sessionStorage.getItem('testUserAnswers');
-            const savedMarked = sessionStorage.getItem('testMarkedForReview');
-            const savedIndex = sessionStorage.getItem('testCurrentIndex');
-            const savedTime = sessionStorage.getItem('testTimeLeft');
+        function loadProgress() {
+            const savedAnswers = sessionStorage.getItem('cbt_userAnswers');
+            const savedMarked = sessionStorage.getItem('cbt_markedForReview');
+            const savedIndex = sessionStorage.getItem('cbt_currentIndex');
+            const savedTime = sessionStorage.getItem('cbt_timeLeft');
             if (savedAnswers) userAnswers = JSON.parse(savedAnswers);
             if (savedMarked) markedForReview = JSON.parse(savedMarked);
             if (savedIndex) currentIndex = parseInt(savedIndex);
             if (savedTime) timeLeft = parseInt(savedTime);
         }
         
-        loadFromSession();
+        loadProgress();
         
         auth.onAuthStateChanged(async (user) => {
             if (!user) { window.location.href = 'login.html'; return; }
@@ -518,13 +499,13 @@
                     submitExam();
                 } else {
                     timeLeft--;
-                    updateTimerDisplay();
-                    saveToSession();
+                    updateTimer();
+                    saveProgress();
                 }
             }, 1000);
         }
         
-        function updateTimerDisplay() {
+        function updateTimer() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             const timerEl = document.getElementById('timerDisplay');
@@ -535,39 +516,47 @@
         }
         
         function renderExam() {
-            const container = document.getElementById('examContent');
+            const container = document.getElementById('examContainer');
             const question = questions[currentIndex];
             if (!question) return;
             
-            let paletteHTML = '';
+            // Build palette
+            let paletteHtml = '';
             questions.forEach((_, idx) => {
-                let statusClass = 'not-answered';
-                if (userAnswers[idx] !== null) statusClass = 'answered';
-                else if (markedForReview[idx]) statusClass = 'marked';
-                if (idx === currentIndex) statusClass = 'current';
-                paletteHTML += `<button class="palette-btn ${statusClass}" onclick="goToQuestion(${idx})">${idx+1}</button>`;
+                let status = 'not-answered';
+                if (userAnswers[idx] !== null) status = 'answered';
+                else if (markedForReview[idx]) status = 'marked';
+                if (idx === currentIndex) status = 'current';
+                paletteHtml += `<button class="palette-btn ${status}" onclick="goToQuestion(${idx})">${idx+1}</button>`;
             });
-            
-            let options = question.options;
-            if (!options && question.a) options = [question.a, question.b, question.c, question.d];
             
             const isMarked = markedForReview[currentIndex];
             
             container.innerHTML = `
                 <div class="exam-header">
-                    <div class="exam-title"><i class="fas fa-stethoscope"></i> Subject Test | <span>${testSubject}</span> | ${testTopic}</div>
-                    <div class="timer-area" id="timerDisplay">00:00</div>
+                    <div class="exam-title">
+                        <i class="fas fa-stethoscope"></i> RPrep CBT | <span>${subjectId}</span> | Test ${testNum}
+                    </div>
+                    <div class="timer-box" id="timerDisplay">00:00</div>
                 </div>
+                
                 <div class="exam-main">
-                    <div class="question-section">
+                    <!-- Left: Question Area -->
+                    <div class="question-area">
                         <div class="question-header">
-                            <div class="q-num"><span>Q${currentIndex+1}/${questions.length}</span> ${testTopic}</div>
-                            <button class="mark-btn ${isMarked ? 'marked' : ''}" onclick="toggleMark()"><i class="fas fa-flag"></i> ${isMarked ? 'Marked' : 'Mark'}</button>
+                            <div class="q-number">
+                                <span>Q${currentIndex+1}/${questions.length}</span>
+                                ${testTopic}
+                            </div>
+                            <button class="mark-review-btn ${isMarked ? 'marked' : ''}" onclick="toggleMarkForReview()">
+                                <i class="fas fa-flag"></i> ${isMarked ? 'Marked for Review' : 'Mark for Review'}
+                            </button>
                         </div>
+                        
                         <div class="question-body">
                             <div class="question-text">${escapeHtml(question.text)}</div>
-                            <div class="options-list">
-                                ${options.map((opt, idx) => `
+                            <div class="options">
+                                ${question.options.map((opt, idx) => `
                                     <div class="option ${userAnswers[currentIndex] === idx ? 'selected' : ''}" onclick="selectOption(${idx})">
                                         <span class="option-prefix">${String.fromCharCode(65+idx)}</span>
                                         <span class="option-text">${escapeHtml(opt)}</span>
@@ -575,15 +564,28 @@
                                 `).join('')}
                             </div>
                         </div>
+                        
                         <div class="nav-buttons">
-                            <button class="cbt-btn btn-prev" onclick="prevQuestion()" ${currentIndex===0 ? 'disabled' : ''}>← Previous</button>
-                            <button class="cbt-btn btn-next" onclick="nextQuestion()" ${currentIndex===questions.length-1 ? 'disabled' : ''}>Next →</button>
-                            <button class="cbt-btn btn-submit" onclick="submitExam()">Submit</button>
+                            <button class="nav-btn prev-btn" onclick="prevQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <div>
+                                ${currentIndex === questions.length - 1 ? 
+                                    `<button class="nav-btn submit-btn" onclick="submitExam()">Submit Exam ✓</button>` :
+                                    `<button class="nav-btn next-btn" onclick="nextQuestion()">Save & Next <i class="fas fa-arrow-right"></i></button>`
+                                }
+                            </div>
                         </div>
                     </div>
-                    <div class="palette-section">
-                        <div class="palette-header"><i class="fas fa-th"></i> Question Palette</div>
-                        <div class="palette-grid">${paletteHTML}</div>
+                    
+                    <!-- Right: Palette Area -->
+                    <div class="palette-area">
+                        <div class="palette-header">
+                            <i class="fas fa-th"></i> Question Palette
+                        </div>
+                        <div class="palette-grid">
+                            ${paletteHtml}
+                        </div>
                         <div class="legend">
                             <div class="legend-item"><div class="legend-color" style="background:#2ecc71;"></div> Answered</div>
                             <div class="legend-item"><div class="legend-color" style="background:#e74c3c;"></div> Not Answered</div>
@@ -593,7 +595,7 @@
                     </div>
                 </div>
             `;
-            updateTimerDisplay();
+            updateTimer();
         }
         
         function escapeHtml(text) {
@@ -606,24 +608,79 @@
             });
         }
         
-        function selectOption(optionIndex) { userAnswers[currentIndex] = optionIndex; renderExam(); saveToSession(); }
-        function toggleMark() { markedForReview[currentIndex] = !markedForReview[currentIndex]; renderExam(); saveToSession(); }
-        function nextQuestion() { if (currentIndex < questions.length - 1) { currentIndex++; renderExam(); saveToSession(); } }
-        function prevQuestion() { if (currentIndex > 0) { currentIndex--; renderExam(); saveToSession(); } }
-        function goToQuestion(index) { currentIndex = index; renderExam(); saveToSession(); }
+        function selectOption(optionIndex) {
+            userAnswers[currentIndex] = optionIndex;
+            renderExam();
+            saveProgress();
+        }
+        
+        function toggleMarkForReview() {
+            markedForReview[currentIndex] = !markedForReview[currentIndex];
+            renderExam();
+            saveProgress();
+        }
+        
+        function nextQuestion() {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderExam();
+                saveProgress();
+            }
+        }
+        
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderExam();
+                saveProgress();
+            }
+        }
+        
+        function goToQuestion(index) {
+            currentIndex = index;
+            renderExam();
+            saveProgress();
+        }
         
         function submitExam() {
-            if (!confirm('Submit test?')) return;
+            if (!confirm('Are you sure you want to submit the exam?')) return;
+            
             clearInterval(timer);
             let correctCount = 0;
             questions.forEach((q, idx) => {
-                const correct = q.correct !== undefined ? q.correct : (q.answer ? parseInt(q.answer) : 0);
-                if (userAnswers[idx] === correct) correctCount++;
+                if (userAnswers[idx] === q.correct) correctCount++;
             });
-            const score = correctCount, total = questions.length, percentage = Math.round((score/total)*100);
-            const results = { subject: testSubject, testId, topic: testTopic, score, total, percentage, questions, userAnswers, markedForReview, date: new Date().toISOString() };
+            
+            const score = correctCount;
+            const total = questions.length;
+            const percentage = Math.round((score / total) * 100);
+            
+            const results = {
+                subject: subjectId,
+                testId: testNum,
+                topic: testTopic,
+                score: score,
+                total: total,
+                percentage: percentage,
+                questions: questions,
+                userAnswers: userAnswers,
+                date: new Date().toISOString()
+            };
+            
             sessionStorage.setItem('testResults', JSON.stringify(results));
-            if(currentUser) db.collection('results').add({ userId: currentUser.uid, subject: testSubject, testId, score, total, percentage, date: new Date() }).catch(e=>console.log(e));
+            
+            if (currentUser) {
+                db.collection('results').add({
+                    userId: currentUser.uid,
+                    subject: subjectId,
+                    testId: testNum,
+                    score: score,
+                    total: total,
+                    percentage: percentage,
+                    date: new Date()
+                }).catch(e => console.log(e));
+            }
+            
             window.location.href = 'result.html';
         }
     </script>
