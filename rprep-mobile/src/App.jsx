@@ -488,8 +488,8 @@ export default function App() {
               <div className="userMenu">
                 <button onClick={() => { setScreen("profile"); setMenuOpen(false); }}>👤 Profile</button>
                 <button onClick={() => { setScreen("results"); setMenuOpen(false); }}>📊 Scorecard</button>
-                <button onClick={() => { alert("Leaderboard next update me activate hoga"); setMenuOpen(false); }}>🏆 Leaderboard</button>
-                <button onClick={() => { alert("Doubt page next update me activate hoga"); setMenuOpen(false); }}>❓ Doubt Page</button>
+                <button onClick={() => { setScreen("leaderboard"); setMenuOpen(false); }}>🏆 Leaderboard</button>
+                <button onClick={() => { setScreen("doubt"); setMenuOpen(false); }}>❓ Doubt Page</button>
                 <button onClick={() => { setScreen("about"); setMenuOpen(false); }}>ℹ️ About Us</button>
                 <button onClick={() => { setScreen("contact"); setMenuOpen(false); }}>📞 Contact Us</button>
                 <button onClick={() => { setScreen("privacy"); setMenuOpen(false); }}>🔐 Privacy Policy</button>
@@ -959,16 +959,39 @@ export default function App() {
 
       {screen === "results" && (
         <main className="page withNav">
-          <h2>My Results</h2>
-          <p className="muted">Your saved test performance.</p>
+          <h2>My Scorecard</h2>
+          <p className="muted">Track your exam practice performance.</p>
 
-          <div className="list">
+          <section className="scoreHero cleanScoreHero">
+            <div>
+              <small>Overall Performance</small>
+              <h1>{myResults.length ? Math.round(myResults.reduce((a,r)=>a+Number(r.percentage||0),0)/myResults.length) : 0}%</h1>
+              <p>Average Score</p>
+            </div>
+
+            <div className="scoreCircle">
+              <b>{bestScore}%</b>
+              <span>Best</span>
+            </div>
+          </section>
+
+          <section className="scoreStatsGrid">
+            <div><span>📝</span><b>{myResults.length}</b><small>Tests Attempted</small></div>
+            <div><span>✅</span><b>{myResults.reduce((a,r)=>a+Number(r.score||0),0)}</b><small>Total Correct</small></div>
+            <div><span>📚</span><b>{myResults.reduce((a,r)=>a+Number(r.total||0),0)}</b><small>Questions Attempted</small></div>
+            <div><span>🏆</span><b>{bestScore}%</b><small>Best Score</small></div>
+          </section>
+
+          <h3 className="sectionHeading">Recent Test History</h3>
+
+          <div className="scoreHistory">
             {myResults.length === 0 && <div className="empty">No results yet</div>}
+
             {myResults.map(r => (
-              <div className="resultItem" key={r.id}>
+              <div className="scoreHistoryItem" key={r.id}>
                 <div>
-                  <b>{r.subject_name}</b>
-                  <span>Test {r.test_number} • {r.score}/{r.total}</span>
+                  <b>{r.subject_name || "Nursing Test"}</b>
+                  <span>Test {r.test_number || "-"} • {r.score}/{r.total}</span>
                 </div>
                 <strong>{r.percentage}%</strong>
               </div>
