@@ -371,17 +371,29 @@ window.autoGenerateTest = async function(){
 };
 
 window.loadTests = async function(){
-  if(!isAdmin()) return alert("Access denied");
-  const snap = await getDocs(query(collection(db,"subject_tests"), orderBy("test_number","asc")));
-  const box = document.getElementById("testList");
-  box.innerHTML = "";
-  snap.forEach(d => {
-    const t = d.data();
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<b>${t.subject_name || t.subject_id}</b><br>Test ${t.test_number || "-"} | ${t.unlockDate || "-"}<br><button class="danger" onclick="deleteTest('${d.id}')">Delete</button>`;
-    box.appendChild(div);
-  });
+  try{
+    if(!isAdmin()) return alert("Access denied");
+
+    const snap = await getDocs(query(collection(db,"subject_tests"), orderBy("test_number","asc")));
+    const box = document.getElementById("testList");
+    box.innerHTML = "";
+
+    if(snap.empty){
+      box.innerHTML = '<div class="card muted">No tests found</div>';
+      return;
+    }
+
+    snap.forEach(d => {
+      const t = d.data();
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `<b>${t.subject_name || t.subject_id}</b><br>Test ${t.test_number || "-"} | ${t.unlockDate || "-"}<br><button class="danger" onclick="deleteTest('${d.id}')">Delete</button>`;
+      box.appendChild(div);
+    });
+  }catch(e){
+    document.getElementById("testList").innerHTML = '<div class="card muted">Test load error: ' + e.message + '</div>';
+    alert("Test load error: " + e.message);
+  }
 };
 
 window.deleteTest = async function(id){
@@ -391,6 +403,70 @@ window.deleteTest = async function(id){
   alert("Deleted");
   loadTests();
 };
+
+window.loadDoubts = async function(){
+  const box = document.getElementById("doubtList");
+  try{
+    if(!isAdmin()) return alert("Access denied");
+
+    box.innerHTML = '<div class="card muted">Loading doubts...</div>';
+
+    const snap = await getDocs(collection(db,"doubts"));
+    box.innerHTML = "";
+
+    if(snap.empty){
+      box.innerHTML = '<div class="card muted">No doubts found</div>';
+      return;
+    }
+
+    snap.forEach(d => {
+      const x = d.data();
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <b>${x.subject || "No Subject"}</b>
+        <p><b>User:</b> ${x.userName || ""} ${x.email ? "(" + x.email + ")" : ""}</p>
+        <p><b>Doubt:</b> ${x.question || ""}</p>
+        <p><b>Status:</b> ${x.status || "Pending"}</p>
+        <textarea id="answer_${d.id}" rows="4" placeholder="Write admin answer...">${x.answer || ""}</textarea>
+        <button onclick="replyDoubt('${d.id}')">Save Reply</button>
+        <button class="danger" onclick="deleteDoubt('${d.id}')">Delete Doubt</button>
+      `;
+      box.appendChild(div);
+    });
+  }catch(e){
+    box.innerHTML = '<div class="card muted">Doubt load error: ' + e.message + '</div>';
+    alert("Doubt load error: " + e.message);
+  }
+};
+
+window.replyDoubt = async function(id){
+  if(!isAdmin()) return alert("Access denied");
+
+  const answer = document.getElementById("answer_" + id).value.trim();
+  if(!answer) return alert("Answer empty hai");
+
+  await updateDoc(doc(db,"doubts",id), {
+    answer,
+    status: "Answered",
+    answeredAt: serverTimestamp(),
+    answeredBy: currentUser.email,
+    answeredByUid: currentUser.uid
+  });
+
+  alert("Doubt reply saved");
+  loadDoubts();
+};
+
+window.deleteDoubt = async function(id){
+  if(!isAdmin()) return alert("Access denied");
+  if(!confirm("Delete this doubt?")) return;
+
+  await deleteDoc(doc(db,"doubts",id));
+  alert("Doubt deleted");
+  loadDoubts();
+};
+
 </script>
 </body>
 </html>
