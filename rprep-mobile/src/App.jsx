@@ -692,32 +692,30 @@ export default function App() {
         </main>
       )}
 
+
       {screen === "privacy" && (
         <main className="page withNav">
           <h2>Privacy Policy</h2>
-          <section className="infoCard">
-            <p>At RPrep, user privacy is important to us. This Privacy Policy explains how we collect, use and protect basic user information.</p>
+          <p className="muted">Last updated: 2026</p>
+
+          <section className="policyCard">
+            <h3>Introduction</h3>
+            <p>RPrep respects user privacy and is committed to protecting personal information collected through the app.</p>
 
             <h3>Information We Collect</h3>
-            <p>When a user creates an account or uses the app, we may collect basic details such as name, email address, phone number, address, exam preparation preference and test performance data.</p>
+            <p>We may collect name, email address, phone number, address, exam preference, test results, scorecard data and submitted doubts.</p>
 
-            <h3>How We Use Information</h3>
-            <p>The collected information is used only to provide app features such as login, profile management, test result saving, scorecard display, performance tracking and personalized exam preparation experience.</p>
+            <h3>How We Use Data</h3>
+            <p>Data is used for login, profile management, score tracking, leaderboard ranking, doubt support and improving app experience.</p>
 
             <h3>Data Storage</h3>
-            <p>User account and profile data may be stored securely using Firebase services. We do not sell, rent or trade user personal information to any third party.</p>
+            <p>User data may be stored using Firebase Authentication and Firestore. We do not sell personal information.</p>
 
-            <h3>Cookies and Analytics</h3>
-            <p>RPrep may use basic analytics or third-party services in the future to understand app usage and improve user experience. If advertisements are displayed, third-party ad services may use cookies according to their own policies.</p>
+            <h3>Advertisements</h3>
+            <p>If ads are enabled in future, third-party ad partners may use cookies or similar technologies according to their own policies.</p>
 
-            <h3>Data Safety</h3>
-            <p>We take reasonable steps to protect user data. However, no online platform can guarantee 100% security. Users should keep their login details safe.</p>
-
-            <h3>User Rights</h3>
-            <p>Users can update their profile details from the app. For account-related concerns, users may contact us through the Contact Us page.</p>
-
-            <h3>Policy Updates</h3>
-            <p>We may update this Privacy Policy from time to time. Continued use of RPrep means the user accepts the updated policy.</p>
+            <h3>Contact</h3>
+            <p>For privacy questions, contact us at support@rprep.online.</p>
           </section>
         </main>
       )}
@@ -725,29 +723,26 @@ export default function App() {
       {screen === "terms" && (
         <main className="page withNav">
           <h2>Terms & Conditions</h2>
-          <section className="infoCard">
-            <p>By using RPrep, you agree to follow these Terms and Conditions. Please read them carefully before using the app.</p>
+          <p className="muted">Please read these terms carefully.</p>
+
+          <section className="policyCard">
+            <h3>Acceptance</h3>
+            <p>By using RPrep, you agree to these Terms & Conditions.</p>
 
             <h3>Educational Purpose</h3>
-            <p>RPrep is made only for educational and exam preparation purposes. The content is designed to help nursing aspirants practice and revise important topics.</p>
+            <p>RPrep provides nursing exam preparation material, practice tests, score tracking and learning support for educational use.</p>
 
             <h3>User Account</h3>
-            <p>Users are responsible for maintaining the confidentiality of their login details. Any activity done through the user account will be considered the responsibility of the account holder.</p>
+            <p>You are responsible for maintaining account security and for activity under your login.</p>
 
-            <h3>Content Usage</h3>
-            <p>All MCQs, explanations, design, pages and app content are provided for personal learning use only. Users should not copy, reproduce, sell or redistribute the content without permission.</p>
+            <h3>Content Use</h3>
+            <p>App content must not be copied, resold, reproduced or misused without permission.</p>
 
-            <h3>Accuracy of Content</h3>
-            <p>We try to provide accurate and useful educational content. However, mistakes may occur. Users are advised to verify important exam updates, syllabus, eligibility and official notifications from official exam websites.</p>
+            <h3>Accuracy</h3>
+            <p>We try to keep content accurate, but users should verify important exam information from official notifications.</p>
 
-            <h3>App Changes</h3>
-            <p>RPrep may update, modify or remove any feature, test series, content or page at any time to improve the platform.</p>
-
-            <h3>Limitation of Liability</h3>
-            <p>RPrep is not responsible for any loss, exam result, selection outcome or decision made by users based on app content. The platform is only a preparation support tool.</p>
-
-            <h3>Acceptance</h3>
-            <p>By continuing to use RPrep, you accept these Terms and Conditions.</p>
+            <h3>Updates</h3>
+            <p>RPrep may update features, content and terms when required.</p>
           </section>
         </main>
       )}
@@ -755,23 +750,23 @@ export default function App() {
       {screen === "disclaimer" && (
         <main className="page withNav">
           <h2>Disclaimer</h2>
-          <section className="infoCard">
-            <p>RPrep is an independent educational platform created for nursing exam preparation and practice support.</p>
+          <p className="muted">Important educational disclaimer.</p>
+
+          <section className="policyCard">
+            <h3>Educational Information</h3>
+            <p>RPrep content is provided for nursing exam preparation and learning support only.</p>
 
             <h3>No Official Affiliation</h3>
-            <p>RPrep is not affiliated with, endorsed by or connected to any government body, recruitment board, AIIMS, RRB, NORCET, DSSSB, PGIMER, ESIC or any official exam authority.</p>
+            <p>RPrep is not officially affiliated with RRB, AIIMS, NORCET, PGIMER, DSSSB or any government recruitment body.</p>
 
-            <h3>Educational Information Only</h3>
-            <p>All information, MCQs, explanations, test series and study content available on RPrep are provided for general educational purposes only.</p>
+            <h3>No Selection Guarantee</h3>
+            <p>Using RPrep does not guarantee selection, rank, appointment or exam qualification.</p>
 
-            <h3>Official Updates</h3>
-            <p>Users should always check official websites and official notifications for exam dates, syllabus, eligibility, admit card, result, recruitment rules and other official information.</p>
+            <h3>Content Verification</h3>
+            <p>Users should verify important details from official exam websites, notifications and standard nursing textbooks.</p>
 
-            <h3>No Guarantee</h3>
-            <p>Using RPrep does not guarantee selection, rank, marks or success in any examination. Success depends on the user’s preparation, consistency, knowledge and official exam performance.</p>
-
-            <h3>Content Correction</h3>
-            <p>If any user finds an error in any question, answer or explanation, they can contact us. We will review and correct genuine mistakes.</p>
+            <h3>External Links</h3>
+            <p>RPrep may contain external links. We are not responsible for external website content or policies.</p>
           </section>
         </main>
       )}
