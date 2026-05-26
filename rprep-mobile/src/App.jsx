@@ -362,6 +362,30 @@ export default function App() {
     setAnswers(copy);
   }
 
+  function clearResponse() {
+    const copy = [...answers];
+    copy[currentQ] = null;
+    setAnswers(copy);
+  }
+
+  function saveAndNext() {
+    if (currentQ < selectedTest.questions.length - 1) {
+      setCurrentQ(currentQ + 1);
+    }
+  }
+
+  function confirmSubmitTest() {
+    const total = selectedTest?.questions?.length || 0;
+    const attempted = answers.filter(a => a !== null).length;
+    const markedCount = marked.length;
+
+    const ok = window.confirm(
+      `Submit Test?\n\nTotal Questions: ${total}\nAttempted: ${attempted}\nNot Attempted: ${total - attempted}\nMarked: ${markedCount}`
+    );
+
+    if (ok) submitTest();
+  }
+
   function toggleMark() {
     setMarked(prev =>
       prev.includes(currentQ)
@@ -1076,22 +1100,40 @@ export default function App() {
         </main>
       )}
 
-      {screen === "exam" && q && (
-        <main className="exam">
-          <div className="examTop">
-            <b>Q {currentQ + 1}/{selectedTest.questions.length}</b>
-            <span>{formatTime(timeLeft)}</span>
-          </div>
 
-          <div className="questionBox">
-            <small>{q.topic || selectedTest.topic_name}</small>
+      {screen === "exam" && q && (
+        <main className="cbtExam">
+          <header className="cbtHeader">
+            <div>
+              <b>{selectedTest.subject_name || "Nursing CBT"}</b>
+              <span>{selectedTest.topic_name || "Practice Test"}</span>
+            </div>
+            <div className="cbtTimer">⏱ {formatTime(timeLeft)}</div>
+          </header>
+
+          <section className="cbtSummary">
+            <div><b>{selectedTest.questions.length}</b><span>Total</span></div>
+            <div><b>{answers.filter(a => a !== null).length}</b><span>Answered</span></div>
+            <div><b>{selectedTest.questions.length - answers.filter(a => a !== null).length}</b><span>Not Answered</span></div>
+            <div><b>{marked.length}</b><span>Marked</span></div>
+          </section>
+
+          <section className="cbtQuestionCard">
+            <div className="cbtQuestionTop">
+              <span>Question {currentQ + 1} of {selectedTest.questions.length}</span>
+              <button onClick={toggleMark}>
+                {marked.includes(currentQ) ? "Unmark Review" : "Mark for Review"}
+              </button>
+            </div>
+
+            <small>{q.topic || selectedTest.topic_name || "Nursing Exam"}</small>
             <h3>{q.question}</h3>
 
-            <div className="options">
+            <div className="cbtOptions">
               {q.options?.map((op, i) => (
                 <button
                   key={i}
-                  className={answers[currentQ] === i ? "option selected" : "option"}
+                  className={answers[currentQ] === i ? "cbtOption selected" : "cbtOption"}
                   onClick={() => selectAnswer(i)}
                 >
                   <b>{String.fromCharCode(65 + i)}</b>
@@ -1099,33 +1141,54 @@ export default function App() {
                 </button>
               ))}
             </div>
-          </div>
+          </section>
 
-          <div className="examActions">
-            <button disabled={currentQ === 0} onClick={() => setCurrentQ(currentQ - 1)}>Previous</button>
-            <button onClick={toggleMark}>{marked.includes(currentQ) ? "Unmark" : "Mark"}</button>
+          <section className="cbtControls">
+            <button disabled={currentQ === 0} onClick={() => setCurrentQ(currentQ - 1)}>
+              Previous
+            </button>
+
+            <button onClick={clearResponse}>
+              Clear Response
+            </button>
+
             {currentQ < selectedTest.questions.length - 1 ? (
-              <button onClick={() => setCurrentQ(currentQ + 1)}>Next</button>
-            ) : (
-              <button className="danger" onClick={submitTest}>Submit</button>
-            )}
-          </div>
-
-          <div className="palette">
-            {selectedTest.questions.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentQ(i)}
-                className={
-                  i === currentQ ? "current" :
-                  answers[i] !== null ? "done" :
-                  marked.includes(i) ? "mark" : ""
-                }
-              >
-                {i + 1}
+              <button className="saveNextBtn" onClick={saveAndNext}>
+                Save & Next
               </button>
-            ))}
-          </div>
+            ) : (
+              <button className="submitCbtBtn" onClick={confirmSubmitTest}>
+                Submit Test
+              </button>
+            )}
+          </section>
+
+          <section className="cbtPaletteBox">
+            <h3>Question Palette</h3>
+
+            <div className="cbtLegend">
+              <span><i className="answered"></i>Answered</span>
+              <span><i className="notAnswered"></i>Not Answered</span>
+              <span><i className="marked"></i>Marked</span>
+              <span><i className="current"></i>Current</span>
+            </div>
+
+            <div className="cbtPalette">
+              {selectedTest.questions.map((_, i) => {
+                let cls = "";
+                if (i === currentQ) cls = "current";
+                else if (marked.includes(i)) cls = "marked";
+                else if (answers[i] !== null) cls = "answered";
+                else cls = "notAnswered";
+
+                return (
+                  <button key={i} onClick={() => setCurrentQ(i)} className={cls}>
+                    {i + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         </main>
       )}
 

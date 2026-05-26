@@ -2463,3 +2463,272 @@ input,textarea,select{
   color:#e53935;
   font-size:20px;
 }
+
+/* REAL CBT EXAM UI */
+.cbtExam{
+  min-height:100vh;
+  padding:12px;
+  background:
+    radial-gradient(circle at top left, rgba(229,57,53,.16), transparent 30%),
+    radial-gradient(circle at top right, rgba(18,60,136,.18), transparent 30%),
+    linear-gradient(180deg,#eef4ff,#f8fbff);
+}
+
+.cbtHeader{
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  background:#071b45;
+  color:white;
+  border-radius:22px;
+  padding:14px;
+  box-shadow:0 14px 35px rgba(7,27,69,.22);
+}
+
+.cbtHeader b{
+  display:block;
+  font-size:16px;
+}
+
+.cbtHeader span{
+  display:block;
+  color:#dbe7ff;
+  font-size:12px;
+  font-weight:700;
+}
+
+.cbtTimer{
+  background:#e53935;
+  color:white;
+  padding:10px 12px;
+  border-radius:16px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.cbtSummary{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+
+.cbtSummary div{
+  background:rgba(255,255,255,.9);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:18px;
+  padding:10px 6px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(7,27,69,.08);
+}
+
+.cbtSummary b{
+  display:block;
+  color:#071b45;
+  font-size:20px;
+}
+
+.cbtSummary span{
+  color:#667085;
+  font-size:11px;
+  font-weight:900;
+}
+
+.cbtQuestionCard{
+  margin-top:12px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:26px;
+  padding:18px;
+  box-shadow:0 18px 45px rgba(7,27,69,.10);
+}
+
+.cbtQuestionTop{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.cbtQuestionTop span{
+  background:#eef4ff;
+  color:#071b45;
+  padding:8px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:13px;
+}
+
+.cbtQuestionTop button{
+  background:#fff4d6;
+  color:#8a5a00;
+  border-radius:999px;
+  padding:8px 10px;
+  font-weight:900;
+  font-size:12px;
+}
+
+.cbtQuestionCard small{
+  color:#e53935;
+  font-weight:900;
+}
+
+.cbtQuestionCard h3{
+  color:#071b45;
+  line-height:1.55;
+  font-size:20px;
+}
+
+.cbtOptions{
+  display:grid;
+  gap:12px;
+  margin-top:14px;
+}
+
+.cbtOption{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  text-align:left;
+  background:#f8fafc;
+  border:2px solid #dbe4f0;
+  border-radius:20px;
+  padding:14px;
+  color:#102033;
+  font-weight:800;
+}
+
+.cbtOption b{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:#e8eef8;
+  color:#071b45;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+}
+
+.cbtOption.selected{
+  border-color:#071b45;
+  background:#eef4ff;
+}
+
+.cbtOption.selected b{
+  background:#071b45;
+  color:white;
+}
+
+.cbtControls{
+  position:sticky;
+  bottom:0;
+  z-index:20;
+  display:grid;
+  grid-template-columns:1fr 1fr 1.2fr;
+  gap:8px;
+  background:rgba(248,251,255,.92);
+  backdrop-filter:blur(14px);
+  padding:12px 0;
+}
+
+.cbtControls button{
+  padding:13px 8px;
+  border-radius:16px;
+  background:#e8eef8;
+  color:#071b45;
+  font-weight:900;
+}
+
+.cbtControls button:disabled{
+  opacity:.45;
+}
+
+.saveNextBtn{
+  background:#071b45!important;
+  color:white!important;
+}
+
+.submitCbtBtn{
+  background:#e53935!important;
+  color:white!important;
+}
+
+.cbtPaletteBox{
+  margin:12px 0 80px;
+  background:rgba(255,255,255,.9);
+  border-radius:26px;
+  padding:16px;
+  box-shadow:0 18px 45px rgba(7,27,69,.10);
+}
+
+.cbtPaletteBox h3{
+  margin:0 0 12px;
+  color:#071b45;
+}
+
+.cbtLegend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.cbtLegend span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:900;
+  color:#667085;
+}
+
+.cbtLegend i{
+  width:12px;
+  height:12px;
+  border-radius:4px;
+  display:inline-block;
+}
+
+.cbtLegend .answered{background:#1f9d55}
+.cbtLegend .notAnswered{background:#dbe4f0}
+.cbtLegend .marked{background:#8b5cf6}
+.cbtLegend .current{background:#e53935}
+
+.cbtPalette{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+}
+
+.cbtPalette button{
+  height:42px;
+  border-radius:14px;
+  font-weight:900;
+  background:#dbe4f0;
+  color:#071b45;
+}
+
+.cbtPalette button.answered{
+  background:#1f9d55;
+  color:white;
+}
+
+.cbtPalette button.marked{
+  background:#8b5cf6;
+  color:white;
+}
+
+.cbtPalette button.current{
+  background:#e53935;
+  color:white;
+}
+
+.cbtPalette button.notAnswered{
+  background:#dbe4f0;
+  color:#071b45;
+}
