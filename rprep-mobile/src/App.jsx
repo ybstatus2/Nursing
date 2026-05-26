@@ -1143,24 +1143,22 @@ export default function App() {
             </div>
           </section>
 
-          <section className="cbtControls">
+          <section className="cbtControls fourBtns">
             <button disabled={currentQ === 0} onClick={() => setCurrentQ(currentQ - 1)}>
               Previous
             </button>
 
             <button onClick={clearResponse}>
-              Clear Response
+              Clear
             </button>
 
-            {currentQ < selectedTest.questions.length - 1 ? (
-              <button className="saveNextBtn" onClick={saveAndNext}>
-                Save & Next
-              </button>
-            ) : (
-              <button className="submitCbtBtn" onClick={confirmSubmitTest}>
-                Submit Test
-              </button>
-            )}
+            <button className="saveNextBtn" onClick={saveAndNext}>
+              Save & Next
+            </button>
+
+            <button className="submitCbtBtn" onClick={confirmSubmitTest}>
+              Submit
+            </button>
           </section>
 
           <section className="cbtPaletteBox">
