@@ -18,6 +18,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   serverTimestamp,
   query,
   orderBy,
@@ -260,7 +261,6 @@ export default function App() {
 
   async function saveProfile() {
     try {
-      const { setDoc } = await import("firebase/firestore");
       const data = {
         ...profileForm,
         email: user.email || "",
