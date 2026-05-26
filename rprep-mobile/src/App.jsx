@@ -47,6 +47,11 @@ export default function App() {
   const [tests, setTests] = useState([]);
   const [myResults, setMyResults] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [myDoubts, setMyDoubts] = useState([]);
+  const [doubtForm, setDoubtForm] = useState({
+    subject: "",
+    question: ""
+  });
   const [profile, setProfile] = useState(null);
   const [editProfile, setEditProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -80,6 +85,7 @@ export default function App() {
         await loadTests();
         await loadResults(u.uid);
         await loadLeaderboard();
+        await loadDoubts(u.uid);
         await loadProfile(u);
         await checkAppUpdate();
       }
@@ -129,6 +135,42 @@ export default function App() {
       alert("Tests load error: " + e.message);
     }
     setLoading(false);
+  }
+
+  async function loadDoubts(uid) {
+    try {
+      const q = query(collection(db, "doubts"), where("userId", "==", uid));
+      const snap = await getDocs(q);
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setMyDoubts(list.reverse());
+    } catch (e) {
+      console.log("Doubts load error:", e);
+    }
+  }
+
+  async function submitDoubt() {
+    try {
+      if (!doubtForm.subject.trim() || !doubtForm.question.trim()) {
+        return alert("Subject aur doubt question enter karo");
+      }
+
+      await addDoc(collection(db, "doubts"), {
+        userId: user.uid,
+        userName: profileForm.name || user.email?.split("@")[0] || "RPrep Student",
+        email: user.email || "",
+        subject: doubtForm.subject.trim(),
+        question: doubtForm.question.trim(),
+        status: "Pending",
+        answer: "",
+        createdAt: serverTimestamp()
+      });
+
+      setDoubtForm({ subject: "", question: "" });
+      await loadDoubts(user.uid);
+      alert("Doubt submitted successfully");
+    } catch (e) {
+      alert("Doubt submit error: " + e.message);
+    }
   }
 
   async function loadLeaderboard() {
@@ -705,24 +747,62 @@ export default function App() {
         </main>
       )}
 
+
       {screen === "doubt" && (
         <main className="page withNav">
-          <h2>Doubt Page</h2>
-          <p className="muted">Ask your nursing exam doubts here.</p>
-          <textarea className="doubtBox" placeholder="Type your doubt here..." rows="5"></textarea>
-          <button className="primaryBtn">Submit Doubt</button>
+          <h2>Doubt Support</h2>
+          <p className="muted">Submit your nursing exam doubt and track reply status.</p>
+
+          <section className="doubtHero">
+            <div>
+              <small>❓ Ask Doubt</small>
+              <h1>Get Study Support</h1>
+              <p>Your submitted doubts will be saved securely in Firestore.</p>
+            </div>
+          </section>
+
+          <section className="doubtFormCard">
+            <label>Subject / Topic</label>
+            <input
+              value={doubtForm.subject}
+              onChange={(e) => setDoubtForm({ ...doubtForm, subject: e.target.value })}
+              placeholder="Example: Anatomy, MSN, Pharmacology"
+            />
+
+            <label>Your Doubt</label>
+            <textarea
+              value={doubtForm.question}
+              onChange={(e) => setDoubtForm({ ...doubtForm, question: e.target.value })}
+              placeholder="Write your question here..."
+              rows="5"
+            />
+
+            <button onClick={submitDoubt}>Submit Doubt</button>
+          </section>
+
+          <h3 className="sectionHeading">My Doubts</h3>
+
+          <div className="doubtList">
+            {myDoubts.length === 0 && <div className="empty">No doubts submitted yet</div>}
+
+            {myDoubts.map(d => (
+              <div className="doubtItem" key={d.id}>
+                <div className="doubtTop">
+                  <b>{d.subject}</b>
+                  <span>{d.status || "Pending"}</span>
+                </div>
+                <p>{d.question}</p>
+                {d.answer && (
+                  <div className="doubtAnswer">
+                    <strong>Answer:</strong>
+                    <p>{d.answer}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </main>
       )}
-
-      {screen === "updates" && (
-        <main className="page withNav">
-          <h2>Updates</h2>
-          <p className="muted">App updates and latest exam notifications.</p>
-          <div className="empty">No new updates</div>
-        </main>
-      )}
-
-
 
       {screen === "about" && (
         <main className="page withNav">

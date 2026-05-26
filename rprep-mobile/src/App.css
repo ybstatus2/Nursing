@@ -2253,3 +2253,120 @@ input,textarea,select{
   color:#e53935;
   font-size:20px;
 }
+
+/* DOUBT SUPPORT */
+.doubtHero{
+  margin-top:18px;
+  border-radius:34px;
+  padding:28px;
+  color:white;
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.28), transparent 34%),
+    linear-gradient(135deg,#071b45,#e53935);
+  box-shadow:0 24px 60px rgba(7,27,69,.20);
+}
+
+.doubtHero small{
+  color:#fff;
+  font-weight:900;
+}
+
+.doubtHero h1{
+  margin:8px 0;
+  font-size:34px;
+  color:white;
+}
+
+.doubtHero p{
+  margin:0;
+  color:#fff;
+  opacity:.9;
+  font-weight:700;
+}
+
+.doubtFormCard{
+  margin-top:18px;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:28px;
+  padding:18px;
+  box-shadow:0 18px 45px rgba(7,27,69,.10);
+  display:grid;
+  gap:10px;
+}
+
+.doubtFormCard label{
+  font-weight:900;
+  color:#071b45;
+}
+
+.doubtFormCard input,
+.doubtFormCard textarea{
+  width:100%;
+  border:1px solid #d9e1ee;
+  border-radius:18px;
+  padding:14px;
+  background:#f8fafc;
+  outline:none;
+}
+
+.doubtFormCard button{
+  margin-top:8px;
+  padding:15px;
+  border-radius:18px;
+  background:#071b45;
+  color:white;
+  font-weight:900;
+}
+
+.sectionHeading{
+  text-align:center;
+  margin:24px 0 12px;
+  color:#071b45;
+}
+
+.doubtList{
+  display:grid;
+  gap:14px;
+}
+
+.doubtItem{
+  background:rgba(255,255,255,.86);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:24px;
+  padding:16px;
+  box-shadow:0 18px 45px rgba(7,27,69,.10);
+}
+
+.doubtTop{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+}
+
+.doubtTop b{
+  color:#071b45;
+}
+
+.doubtTop span{
+  background:#fff4d6;
+  color:#8a5a00;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+}
+
+.doubtItem p{
+  color:#667085;
+  font-weight:700;
+  line-height:1.55;
+}
+
+.doubtAnswer{
+  margin-top:12px;
+  background:#eef4ff;
+  border-radius:18px;
+  padding:12px;
+}
