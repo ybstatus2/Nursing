@@ -67,6 +67,16 @@
           </select>
         </div>
         <div>
+          <label>Test Series</label>
+          <select id="testSeries">
+            <option value="">Subject Test</option>
+            <option value="daily_morning">Daily Morning Test</option>
+            <option value="daily_evening">Daily Evening Test</option>
+            <option value="365_days">365 Days Challenge</option>
+            <option value="norcet_100_days">NORCET 100 Days Challenge</option>
+          </select>
+        </div>
+        <div>
           <label>Unlock Date</label>
           <input id="unlockDate" type="date">
         </div>
@@ -228,7 +238,20 @@ window.showJsonFormat = function(){
     "<b>JSON format added.</b><br>Edit this sample and paste your full questions.";
 };
 
-function getQuestionsFromBox(){
+window.fillSubjectName = function(){
+    const dd = document.getElementById("subjectDropdown");
+    const name = dd.options[dd.selectedIndex]?.dataset?.name || "";
+    document.getElementById("subject_name").value = name;
+  };
+
+  function getSeriesName(series){
+    return series === "365_days" ? "365 Days Challenge" :
+      series === "norcet_100_days" ? "NORCET 100 Days Challenge" :
+      series === "daily_morning" ? "Daily Morning Test" :
+      series === "daily_evening" ? "Daily Evening Test" : "";
+  }
+
+  function getQuestionsFromBox(){
   const raw = document.getElementById("questions").value.trim();
   if(!raw) throw new Error("Questions JSON empty hai");
   const questions = JSON.parse(raw);
@@ -257,38 +280,57 @@ window.validateQuestionsJson = function(){
 };
 
 window.shufflePreview = function(){
-  try{
-    const questions = getQuestionsFromBox();
-    const count = {A:0,B:0,C:0,D:0,Other:0};
+    try{
+      let questions = getQuestionsFromBox();
 
-    questions.forEach(q=>{
-      const c = Number(q.correct);
-      if(c === 0) count.A++;
-      else if(c === 1) count.B++;
-      else if(c === 2) count.C++;
-      else if(c === 3) count.D++;
-      else count.Other++;
-    });
+      // shuffle questions every click
+      questions = shuffleArray(questions);
 
-    const total = questions.length;
-    const pct = n => total ? Math.round((n/total)*100) : 0;
+      // shuffle options every click and update correct index
+      questions = questions.map(q => {
+        const oldCorrect = Number(q.correct);
+        const correctText = q.options[oldCorrect];
+        const newOptions = shuffleArray(q.options || []);
+        return {
+          ...q,
+          options: newOptions,
+          correct: newOptions.indexOf(correctText)
+        };
+      });
 
-    document.getElementById("jsonReport").innerHTML = `
-      <b>📊 Correct Option Distribution</b><br>
-      A: ${count.A} (${pct(count.A)}%)<br>
-      B: ${count.B} (${pct(count.B)}%)<br>
-      C: ${count.C} (${pct(count.C)}%)<br>
-      D: ${count.D} (${pct(count.D)}%)<br>
-      Other: ${count.Other} (${pct(count.Other)}%)<br>
-      <br><b>Total:</b> ${total}
-    `;
-  }catch(e){
-    document.getElementById("jsonReport").innerHTML =
-      "<b>❌ Preview Error</b><br>" + e.message;
-  }
-};
+      document.getElementById("questions").value = JSON.stringify(questions, null, 2);
 
-window.uploadTest = async function(){
+      const count = {A:0,B:0,C:0,D:0,Other:0};
+      questions.forEach(q=>{
+        const c = Number(q.correct);
+        if(c === 0) count.A++;
+        else if(c === 1) count.B++;
+        else if(c === 2) count.C++;
+        else if(c === 3) count.D++;
+        else count.Other++;
+      });
+
+      const total = questions.length;
+      const pct = n => total ? Math.round((n/total)*100) : 0;
+
+      document.getElementById("jsonReport").innerHTML = `
+        <b>🔀 Shuffled Successfully</b><br>
+        Har click par questions/options dobara shuffle honge.<br><br>
+        <b>📊 Correct Option Distribution</b><br>
+        A: ${count.A} (${pct(count.A)}%)<br>
+        B: ${count.B} (${pct(count.B)}%)<br>
+        C: ${count.C} (${pct(count.C)}%)<br>
+        D: ${count.D} (${pct(count.D)}%)<br>
+        Other: ${count.Other} (${pct(count.Other)}%)<br>
+        <br><b>Total:</b> ${total}
+      `;
+    }catch(e){
+      document.getElementById("jsonReport").innerHTML =
+        "<b>❌ Preview Error</b><br>" + e.message;
+    }
+  };
+
+  window.uploadTest = async function(){
   if(!isAdmin()) return alert("Access denied");
 
   const questions = getQuestionsFromBox();
@@ -347,7 +389,7 @@ window.autoGenerateTest = async function(){
 
     for(const [subject, count] of Object.entries(weightage)){
       const pool = bank.filter(q =>
-        String(q.subject || "").toLowerCase() === String(subject).toLowerCase()
+        String(q.subject_id || q.subject || "").toLowerCase() === String(subject).toLowerCase()
       );
 
       const shuffled = pool.sort(() => Math.random() - 0.5);
