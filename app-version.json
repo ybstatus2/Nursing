@@ -1,0 +1,12 @@
+{
+  "latestVersionCode": 1,
+  "latestVersionName": "1.0.0",
+  "minimumVersionCode": 1,
+  "forceUpdate": false,
+  "apkUrl": "https://rprep.online/download/rprep-v1.apk",
+  "releaseNotes": [
+    "Initial RPrep Android app release",
+    "CBT test system added",
+    "Firebase login and dashboard support"
+  ]
+}
