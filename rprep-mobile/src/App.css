@@ -2173,3 +2173,83 @@ input,textarea,select{
   line-height:1.6;
   font-weight:700;
 }
+
+/* LIVE LEADERBOARD */
+.leaderHero{
+  margin-top:18px;
+  border-radius:34px;
+  padding:28px;
+  color:white;
+  background:
+    radial-gradient(circle at top right, rgba(255,209,102,.42), transparent 32%),
+    linear-gradient(135deg,#071b45,#123c88);
+  box-shadow:0 24px 60px rgba(7,27,69,.22);
+}
+
+.leaderHero small{
+  color:#dbe7ff;
+  font-weight:900;
+}
+
+.leaderHero h1{
+  margin:8px 0;
+  font-size:36px;
+  color:white;
+}
+
+.leaderHero p{
+  margin:0;
+  color:#dbe7ff;
+  font-weight:700;
+}
+
+.leaderList{
+  margin-top:18px;
+  display:grid;
+  gap:14px;
+}
+
+.leaderItem{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:24px;
+  padding:16px;
+  box-shadow:0 18px 45px rgba(7,27,69,.10);
+}
+
+.rankBadge{
+  width:44px;
+  height:44px;
+  border-radius:16px;
+  background:#071b45;
+  color:white;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+}
+
+.leaderInfo{
+  flex:1;
+  min-width:0;
+}
+
+.leaderInfo b{
+  display:block;
+  color:#071b45;
+  font-size:16px;
+}
+
+.leaderInfo span{
+  color:#667085;
+  font-weight:700;
+  font-size:13px;
+}
+
+.leaderItem strong{
+  color:#e53935;
+  font-size:20px;
+}

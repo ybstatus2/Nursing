@@ -46,6 +46,7 @@ export default function App() {
 
   const [tests, setTests] = useState([]);
   const [myResults, setMyResults] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [profile, setProfile] = useState(null);
   const [editProfile, setEditProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -78,6 +79,7 @@ export default function App() {
       if (u) {
         await loadTests();
         await loadResults(u.uid);
+        await loadLeaderboard();
         await loadProfile(u);
         await checkAppUpdate();
       }
@@ -127,6 +129,46 @@ export default function App() {
       alert("Tests load error: " + e.message);
     }
     setLoading(false);
+  }
+
+  async function loadLeaderboard() {
+    try {
+      const snap = await getDocs(collection(db, "results"));
+      const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      const users = {};
+
+      all.forEach(r => {
+        const uid = r.userId || r.uid || r.email || "unknown";
+        if (!users[uid]) {
+          users[uid] = {
+            userId: uid,
+            name: r.userName || r.name || r.email || "RPrep Student",
+            email: r.email || "",
+            tests: 0,
+            totalScore: 0,
+            bestScore: 0
+          };
+        }
+
+        const percentage = Number(r.percentage || 0);
+        users[uid].tests += 1;
+        users[uid].totalScore += percentage;
+        users[uid].bestScore = Math.max(users[uid].bestScore, percentage);
+      });
+
+      const list = Object.values(users)
+        .map(u => ({
+          ...u,
+          averageScore: u.tests ? Math.round(u.totalScore / u.tests) : 0
+        }))
+        .sort((a, b) => b.bestScore - a.bestScore || b.averageScore - a.averageScore || b.tests - a.tests)
+        .slice(0, 50);
+
+      setLeaderboard(list);
+    } catch (e) {
+      console.log("Leaderboard load error:", e);
+    }
   }
 
   async function loadResults(uid) {
@@ -618,11 +660,34 @@ export default function App() {
         </main>
       )}
 
+
       {screen === "leaderboard" && (
         <main className="page withNav">
           <h2>Leaderboard</h2>
-          <p className="muted">Top students ranking will show here.</p>
-          <div className="empty">Leaderboard coming soon</div>
+          <p className="muted">Top students based on saved test performance.</p>
+
+          <section className="leaderHero">
+            <div>
+              <small>🏆 Live Ranking</small>
+              <h1>Top Performers</h1>
+              <p>Ranking updates from Firestore test results.</p>
+            </div>
+          </section>
+
+          <div className="leaderList">
+            {leaderboard.length === 0 && <div className="empty">No leaderboard data yet</div>}
+
+            {leaderboard.map((u, index) => (
+              <div className="leaderItem" key={u.userId}>
+                <div className="rankBadge">{index + 1}</div>
+                <div className="leaderInfo">
+                  <b>{u.name}</b>
+                  <span>{u.tests} Tests • Avg {u.averageScore}%</span>
+                </div>
+                <strong>{u.bestScore}%</strong>
+              </div>
+            ))}
+          </div>
         </main>
       )}
 
