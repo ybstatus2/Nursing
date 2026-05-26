@@ -301,12 +301,18 @@ export default function App() {
     return String(test.unlockDate) <= todayDateString();
   }
 
+  function isComingSoonSeries(seriesId) {
+    return ["365_days", "norcet_100_days"].includes(seriesId);
+  }
+
   function openSeries(seriesId, seriesName, mode = "allUnlocked") {
     setSelectedSubject({
       id: seriesId,
       name: seriesName,
       isSeries: true,
-      mode
+      mode,
+      comingSoon: isComingSoonSeries(seriesId),
+      launchDate: "1 June 2026"
     });
     setScreen("testList");
   }
@@ -723,9 +729,11 @@ export default function App() {
           <div className="list">
             {subjectTests.length === 0 && (
               <div className="empty">
-                {selectedSubject?.isSeries
-                  ? "Aaj ka test abhi available nahi hai. Please unlock date ke according test add karo."
-                  : "No tests available"}
+                {selectedSubject?.comingSoon
+                  ? "Coming Soon — Launching on 1 June 2026"
+                  : selectedSubject?.isSeries
+                    ? "Today's test is not available yet. Please check again later."
+                    : "No tests available"}
               </div>
             )}
 
