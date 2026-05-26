@@ -19,14 +19,16 @@
             background: #f0f2f5;
             overflow-x: hidden;
             width: 100%;
-            height: 100vh;
+            min-height: 100vh;
         }
 
-        /* LANDSCAPE WARNING - Full Screen Block */
+        /* LANDSCAPE WARNING - Full Screen Center */
         .landscape-warning {
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #1e3c72, #2a5298);
@@ -35,14 +37,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
             text-align: center;
-            backdrop-filter: blur(4px);
+            flex-direction: column;
+        }
+
+        .landscape-warning .warning-content {
+            text-align: center;
+            padding: 20px;
         }
 
         .landscape-warning i {
             font-size: 70px;
             animation: rotateAnim 2s ease infinite;
+            display: inline-block;
         }
 
         .landscape-warning h2 {
@@ -62,13 +69,12 @@
             50% { transform: rotate(90deg); }
         }
 
-        /* Main Exam Container - Only Visible in Landscape */
+        /* Main Exam Container */
         .exam-wrapper {
             display: none;
             width: 100%;
-            height: 100vh;
+            min-height: 100vh;
             background: #f0f2f5;
-            overflow: hidden;
         }
 
         /* Landscape Mode Active */
@@ -77,8 +83,7 @@
                 display: none !important;
             }
             .exam-wrapper {
-                display: flex !important;
-                flex-direction: column;
+                display: block !important;
             }
         }
 
@@ -135,16 +140,14 @@
             50% { opacity: 0.7; }
         }
 
-        /* Main Content Area */
         .exam-main {
             display: flex;
             flex: 1;
-            overflow: hidden;
             padding: 12px;
             gap: 12px;
+            min-height: calc(100vh - 55px);
         }
 
-        /* Question Area */
         .question-section {
             flex: 3;
             background: white;
@@ -262,7 +265,6 @@
             color: #333;
         }
 
-        /* Navigation Buttons */
         .nav-buttons {
             padding: 12px 20px;
             border-top: 1px solid #e0e4e8;
@@ -331,7 +333,6 @@
             cursor: not-allowed;
         }
 
-        /* Palette Area - Right Side */
         .palette-section {
             flex: 1;
             background: white;
@@ -417,6 +418,31 @@
             border-radius: 3px;
         }
 
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #e74c3c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         /* Scrollbar */
         .question-body::-webkit-scrollbar, .palette-grid::-webkit-scrollbar {
             width: 5px;
@@ -432,7 +458,6 @@
             border-radius: 5px;
         }
 
-        /* Compact Mode for smaller screens */
         @media (max-width: 900px) {
             .question-text { font-size: 14px; }
             .option-text { font-size: 12px; }
@@ -447,39 +472,18 @@
             .palette-grid { gap: 5px; }
             .palette-btn { font-size: 10px; }
         }
-
-        /* Loading */
-        .loading-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #f0f2f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e0e0e0;
-            border-top-color: #e74c3c;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Landscape Warning Screen -->
+    <!-- Landscape Warning Screen - Full Center -->
     <div class="landscape-warning" id="landscapeWarning">
-        <i class="fas fa-rotate-right"></i>
-        <h2>Rotate Your Device</h2>
-        <p>Please rotate your device to Landscape Mode<br>for the best CBT exam experience</p>
-        <p style="font-size: 12px; margin-top: 20px;">Test will start automatically after rotation</p>
+        <div class="warning-content">
+            <i class="fas fa-rotate-right"></i>
+            <h2>Rotate Your Device</h2>
+            <p>Please rotate your device to Landscape Mode<br>for the best CBT exam experience</p>
+            <p style="font-size: 12px; margin-top: 20px;">Test will start automatically after rotation</p>
+        </div>
     </div>
 
     <!-- Main Exam Container -->
@@ -487,6 +491,7 @@
         <div id="examContent">
             <div class="loading-container">
                 <div class="spinner"></div>
+                <p style="margin-top: 15px;">Loading CBT Exam...</p>
             </div>
         </div>
     </div>
@@ -496,22 +501,6 @@
     <script src="firebase-config.js"></script>
 
     <script>
-        // Orientation change handler - Refresh page when rotated to landscape
-        let lastOrientation = window.screen.orientation?.type || (window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
-        
-        function handleOrientationChange() {
-            const currentOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
-            
-            if (currentOrientation === 'landscape' && lastOrientation === 'portrait') {
-                // Page just rotated to landscape - refresh to ensure proper rendering
-                window.location.reload();
-            }
-            lastOrientation = currentOrientation;
-        }
-        
-        window.addEventListener('resize', handleOrientationChange);
-        window.addEventListener('orientationchange', handleOrientationChange);
-        
         let currentUser = null;
         let questions = [];
         let currentIndex = 0;
@@ -525,12 +514,10 @@
         const testId = urlParams.get('test') || sessionStorage.getItem('testId') || '1';
         const testTopic = urlParams.get('topic') || sessionStorage.getItem('testTopic') || 'General';
         
-        // Load stored questions
         const storedQuestions = sessionStorage.getItem('testQuestions');
         if (storedQuestions) {
             questions = JSON.parse(storedQuestions);
         } else {
-            // CBT Style Sample Questions
             questions = [
                 { text: "A patient presents with chest pain radiating to left arm. What is the most likely diagnosis?", options: ["Angina Pectoris", "Myocardial Infarction", "Pericarditis", "GERD"], correct: 1 },
                 { text: "Which of the following is the first-line treatment for hypertension?", options: ["ACE Inhibitors", "Beta Blockers", "Calcium Channel Blockers", "Thiazide Diuretics"], correct: 3 },
@@ -544,6 +531,27 @@
         markedForReview = new Array(questions.length).fill(false);
         currentIndex = 0;
         timeLeft = questions.length * 75;
+        
+        function saveToSession() {
+            sessionStorage.setItem('testUserAnswers', JSON.stringify(userAnswers));
+            sessionStorage.setItem('testMarkedForReview', JSON.stringify(markedForReview));
+            sessionStorage.setItem('testCurrentIndex', currentIndex);
+            sessionStorage.setItem('testTimeLeft', timeLeft);
+        }
+        
+        function loadFromSession() {
+            const savedAnswers = sessionStorage.getItem('testUserAnswers');
+            const savedMarked = sessionStorage.getItem('testMarkedForReview');
+            const savedIndex = sessionStorage.getItem('testCurrentIndex');
+            const savedTime = sessionStorage.getItem('testTimeLeft');
+            
+            if (savedAnswers) userAnswers = JSON.parse(savedAnswers);
+            if (savedMarked) markedForReview = JSON.parse(savedMarked);
+            if (savedIndex) currentIndex = parseInt(savedIndex);
+            if (savedTime) timeLeft = parseInt(savedTime);
+        }
+        
+        loadFromSession();
         
         auth.onAuthStateChanged(async (user) => {
             if (!user) { window.location.href = 'login.html'; return; }
@@ -565,6 +573,7 @@
                 } else {
                     timeLeft--;
                     updateTimerDisplay();
+                    saveToSession();
                 }
             }, 1000);
         }
@@ -586,7 +595,6 @@
             const question = questions[currentIndex];
             if (!question) return;
             
-            // Build palette
             let paletteHTML = '';
             questions.forEach((_, idx) => {
                 let statusClass = 'not-answered';
@@ -604,7 +612,7 @@
             const isMarked = markedForReview[currentIndex];
             
             container.innerHTML = `
-                <div style="height:100vh; display:flex; flex-direction:column;">
+                <div style="min-height:100vh; display:flex; flex-direction:column;">
                     <div class="exam-header">
                         <div class="exam-title">
                             <i class="fas fa-stethoscope"></i> RPrep CBT | <span>${testSubject}</span> | ${testTopic}
@@ -613,7 +621,6 @@
                     </div>
                     
                     <div class="exam-main">
-                        <!-- Question Area -->
                         <div class="question-section">
                             <div class="question-header">
                                 <div class="q-num">
@@ -625,12 +632,12 @@
                                 </button>
                             </div>
                             <div class="question-body">
-                                <div class="question-text">${question.text}</div>
+                                <div class="question-text">${escapeHtml(question.text)}</div>
                                 <div class="options-list">
                                     ${options.map((opt, idx) => `
                                         <div class="option ${userAnswers[currentIndex] === idx ? 'selected' : ''}" onclick="selectOption(${idx})">
                                             <span class="option-prefix">${String.fromCharCode(65+idx)}</span>
-                                            <span class="option-text">${opt}</span>
+                                            <span class="option-text">${escapeHtml(opt)}</span>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -647,7 +654,6 @@
                             </div>
                         </div>
                         
-                        <!-- Palette Area -->
                         <div class="palette-section">
                             <div class="palette-header">
                                 <i class="fas fa-th"></i> Question Palette
@@ -666,6 +672,16 @@
                 </div>
             `;
             updateTimerDisplay();
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
         
         function selectOption(optionIndex) {
@@ -700,25 +716,6 @@
             currentIndex = index;
             renderExam();
             saveToSession();
-        }
-        
-        function saveToSession() {
-            sessionStorage.setItem('testUserAnswers', JSON.stringify(userAnswers));
-            sessionStorage.setItem('testMarkedForReview', JSON.stringify(markedForReview));
-            sessionStorage.setItem('testCurrentIndex', currentIndex);
-            sessionStorage.setItem('testTimeLeft', timeLeft);
-        }
-        
-        function loadFromSession() {
-            const savedAnswers = sessionStorage.getItem('testUserAnswers');
-            const savedMarked = sessionStorage.getItem('testMarkedForReview');
-            const savedIndex = sessionStorage.getItem('testCurrentIndex');
-            const savedTime = sessionStorage.getItem('testTimeLeft');
-            
-            if (savedAnswers) userAnswers = JSON.parse(savedAnswers);
-            if (savedMarked) markedForReview = JSON.parse(savedMarked);
-            if (savedIndex) currentIndex = parseInt(savedIndex);
-            if (savedTime) timeLeft = parseInt(savedTime);
         }
         
         function submitExam() {
@@ -764,9 +761,6 @@
             
             window.location.href = 'result.html';
         }
-        
-        // Load saved progress if exists
-        loadFromSession();
     </script>
 </body>
 </html>
