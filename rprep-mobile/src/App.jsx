@@ -159,7 +159,7 @@ export default function App() {
   async function submitDoubt() {
     try {
       if (!doubtForm.subject.trim() || !doubtForm.question.trim()) {
-        return alert("Subject aur doubt question enter karo");
+        return alert("Please enter subject and your doubt question");
       }
 
       await addDoc(collection(db, "doubts"), {
@@ -346,7 +346,7 @@ export default function App() {
 
   async function handleAuth() {
     try {
-      if (!email || !password) return alert("Email aur password enter karo");
+      if (!email || !password) return alert("Please enter email and password");
 
       if (authMode === "signup") {
         await createUserWithEmailAndPassword(auth, email, password);
@@ -394,7 +394,7 @@ export default function App() {
 
   function startTest(test) {
     const qs = Array.isArray(test.questions) ? test.questions : [];
-    if (!qs.length) return alert("Is test me questions nahi mile");
+    if (!qs.length) return alert("No questions found in this test");
 
     setSelectedTest(test);
     setCurrentQ(0);
@@ -454,6 +454,8 @@ export default function App() {
 
     const finalResult = {
       userId: user?.uid || "",
+      userName: profileForm.name || user?.email?.split("@")[0] || "RPrep Student",
+      email: user?.email || "",
       userEmail: user?.email || "",
       testId: selectedTest.id,
       subject_id: selectedTest.subject_id,
@@ -771,14 +773,14 @@ export default function App() {
               <div className="seriesIcon">🔥</div>
               <h3>365 Days Challenge</h3>
               <p>One year complete nursing exam preparation.</p>
-              <button onClick={() => openSeries("365_days", "365 Days Challenge", "allUnlocked")}>Open Challenge</button>
+              <button onClick={() => openSeries("365_days", "365 Days Challenge", "allUnlocked")}>Coming Soon</button>
             </div>
 
             <div className="seriesCard">
               <div className="seriesIcon">🎯</div>
               <h3>NORCET 100 Days Challenge</h3>
               <p>High-yield NORCET focused test practice.</p>
-              <button onClick={() => openSeries("norcet_100_days", "NORCET 100 Days Challenge", "allUnlocked")}>Open Challenge</button>
+              <button onClick={() => openSeries("norcet_100_days", "NORCET 100 Days Challenge", "allUnlocked")}>Coming Soon</button>
             </div>
           </section>
         </main>
