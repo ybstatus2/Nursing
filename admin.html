@@ -36,12 +36,34 @@
       <div class="grid">
         <div>
           <label>Test Type</label>
-          <select id="subject_id">
+          <select id="subject_id" onchange="toggleSubjectDropdown()">
             <option value="daily_morning">Daily Morning Test</option>
             <option value="daily_evening">Daily Evening Test</option>
             <option value="365_days">365 Days Challenge</option>
             <option value="norcet_100_days">NORCET 100 Days Challenge</option>
             <option value="subject_test">Subject Test</option>
+          </select>
+
+          <select id="subjectDropdown" style="display:none" onchange="applySubjectDropdown()">
+            <option value="">Select Subject</option>
+            <option value="anatomy">Anatomy</option>
+            <option value="physiology">Physiology</option>
+            <option value="fundamentals">Fundamentals of Nursing</option>
+            <option value="nutrition">Nutrition</option>
+            <option value="biochemistry">Biochemistry</option>
+            <option value="microbiology">Microbiology</option>
+            <option value="psychology">Psychology</option>
+            <option value="sociology">Sociology</option>
+            <option value="pharmacology">Pharmacology</option>
+            <option value="pathology">Pathology</option>
+            <option value="genetics">Genetics</option>
+            <option value="msn">Medical Surgical Nursing</option>
+            <option value="chn">Community Health Nursing</option>
+            <option value="obg">Obstetrics and Gynecology Nursing</option>
+            <option value="pediatric">Child Health Nursing</option>
+            <option value="psychiatric">Mental Health Nursing</option>
+            <option value="research">Nursing Research</option>
+            <option value="management">Nursing Management</option>
           </select>
         </div>
         <div>
@@ -67,8 +89,11 @@
 
       <textarea id="questions" rows="12" placeholder='Questions JSON here'></textarea>
 
+      <button onclick="validateQuestionsJson()">Validate JSON</button>
+      <button onclick="shufflePreview()">Shuffle Preview %</button>
       <button onclick="uploadTest()">Upload Test</button>
       <p id="uploadStatus" class="muted"></p>
+      <div id="jsonReport" class="card muted"></div>
     </section>
 
     <section class="card">
@@ -144,13 +169,99 @@ window.logoutAdmin = async function(){
   await signOut(auth);
 };
 
+
+
+window.toggleSubjectDropdown = function(){
+  const type = document.getElementById("subject_id").value;
+  const dd = document.getElementById("subjectDropdown");
+  dd.style.display = type === "subject_test" ? "block" : "none";
+};
+
+window.applySubjectDropdown = function(){
+  const dd = document.getElementById("subjectDropdown");
+  const subjectNameInput = document.getElementById("subject_name");
+  const selectedText = dd.options[dd.selectedIndex]?.text || "";
+  if(dd.value){
+    subjectNameInput.value = selectedText;
+  }
+};
+
+function shuffleArray(arr){
+  return arr
+    .map(v => ({ v, sort: Math.random() }))
+    .sort((a,b) => a.sort - b.sort)
+    .map(({v}) => v);
+}
+
+function getQuestionsFromBox(){
+  const raw = document.getElementById("questions").value.trim();
+  if(!raw) throw new Error("Questions JSON empty hai");
+  const questions = JSON.parse(raw);
+  if(!Array.isArray(questions)) throw new Error("JSON array format me hona chahiye");
+
+  questions.forEach((q,i)=>{
+    if(!q.question) throw new Error("Question missing at index " + i);
+    if(!Array.isArray(q.options) || q.options.length < 4) throw new Error("Options missing at index " + i);
+    if(q.correct === undefined || q.correct === null) throw new Error("Correct answer missing at index " + i);
+    const c = Number(q.correct);
+    if(c < 0 || c >= q.options.length) throw new Error("Correct index invalid at index " + i);
+  });
+
+  return questions;
+}
+
+window.validateQuestionsJson = function(){
+  try{
+    const questions = getQuestionsFromBox();
+    document.getElementById("jsonReport").innerHTML =
+      "<b>✅ JSON Valid</b><br>Total Questions: " + questions.length;
+  }catch(e){
+    document.getElementById("jsonReport").innerHTML =
+      "<b>❌ JSON Error</b><br>" + e.message;
+  }
+};
+
+window.shufflePreview = function(){
+  try{
+    const questions = getQuestionsFromBox();
+    const count = {A:0,B:0,C:0,D:0,Other:0};
+
+    questions.forEach(q=>{
+      const c = Number(q.correct);
+      if(c === 0) count.A++;
+      else if(c === 1) count.B++;
+      else if(c === 2) count.C++;
+      else if(c === 3) count.D++;
+      else count.Other++;
+    });
+
+    const total = questions.length;
+    const pct = n => total ? Math.round((n/total)*100) : 0;
+
+    document.getElementById("jsonReport").innerHTML = `
+      <b>📊 Correct Option Distribution</b><br>
+      A: ${count.A} (${pct(count.A)}%)<br>
+      B: ${count.B} (${pct(count.B)}%)<br>
+      C: ${count.C} (${pct(count.C)}%)<br>
+      D: ${count.D} (${pct(count.D)}%)<br>
+      Other: ${count.Other} (${pct(count.Other)}%)<br>
+      <br><b>Total:</b> ${total}
+    `;
+  }catch(e){
+    document.getElementById("jsonReport").innerHTML =
+      "<b>❌ Preview Error</b><br>" + e.message;
+  }
+};
+
 window.uploadTest = async function(){
   if(!isAdmin()) return alert("Access denied");
 
-  const questions = JSON.parse(document.getElementById("questions").value);
+  const questions = getQuestionsFromBox();
 
   const data = {
-    subject_id: document.getElementById("subject_id").value,
+    subject_id: document.getElementById("subject_id").value === "subject_test"
+      ? document.getElementById("subjectDropdown").value
+      : document.getElementById("subject_id").value,
     subject_name: document.getElementById("subject_name").value,
     topic_name: document.getElementById("topic_name").value,
     test_number: Number(document.getElementById("test_number").value),
@@ -214,7 +325,7 @@ window.autoGenerateTest = async function(){
       selected.push(...remaining.slice(0, total - selected.length));
     }
 
-    selected = selected.slice(0,total).map(q => ({
+    selected = shuffleArray(selected).slice(0,total).map(q => ({
       question: q.question,
       options: q.options,
       correct: Number(q.correct),
