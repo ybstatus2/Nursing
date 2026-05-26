@@ -124,12 +124,18 @@
       <button onclick="loadTests()">Load Tests</button>
       <div id="testList"></div>
     </section>
+
+    <section class="card">
+      <h2>Doubt Reply Section</h2>
+      <button onclick="loadDoubts()">Load Doubts</button>
+      <div id="doubtList"></div>
+    </section>
   </main>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBB6wEYXCeu-IhgdkbD4zEaBmSJ9xkCXC0",
