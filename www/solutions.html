@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Solutions - RPrep Nursing Exam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .solutions-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .solution-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .solution-card.correct {
+            border-left: 5px solid #2ecc71;
+        }
+
+        .solution-card.wrong {
+            border-left: 5px solid #e74c3c;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1e3c72;
+        }
+
+        .user-answer {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .user-answer.correct {
+            background: #2ecc7120;
+            color: #2ecc71;
+        }
+
+        .user-answer.wrong {
+            background: #e74c3c20;
+            color: #e74c3c;
+        }
+
+        .correct-answer {
+            color: #2ecc71;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .solutions-container {
+                padding: 0 1rem;
+            }
+        }
+    
+
+/* DASHBOARD SAME HEADER FOOTER CSS */
+.header {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            padding: 1rem 2rem;
+        }
+.nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+.logo { display: flex; align-items: center; gap: 0.5rem; }
+.logo h1 { font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #1e3c72, #2a5298, #e74c3c); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.logo p { font-size: 0.7rem; color: #e74c3c; }
+.nav-links { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+.nav-links a { text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s; }
+.nav-links a:hover { color: #e74c3c; }
+.logout-btn { background: transparent; border: 2px solid #e74c3c; color: #e74c3c; padding: 0.5rem 1.2rem; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+.logout-btn:hover { background: #e74c3c; color: white; }
+.menu-btn { display: none; font-size: 1.8rem; background: none; border: none; cursor: pointer; }
+.footer {
+            background: #1a1a2e;
+            color: #ccc;
+            margin-top: 3rem;
+            padding: 2rem 2rem 1rem;
+        }
+.footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+.footer-section h4 { color: white; margin-bottom: 1rem; font-size: 1rem; }
+.footer-section a { display: block; color: #aaa; text-decoration: none; margin: 0.5rem 0; font-size: 0.85rem; }
+.footer-section a:hover { color: #e74c3c; }
+.social-links { display: flex; gap: 1rem; margin-top: 1rem; }
+.social-links a { background: #333; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.copyright { text-align: center; padding-top: 2rem; margin-top: 2rem; border-top: 1px solid #333; font-size: 0.75rem; }
+@media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .nav-links { display: none; width: 100%; flex-direction: column; background: white; padding: 1rem; border-radius: 1rem; margin-top: 1rem; }
+            .nav-links.show { display: flex; }
+        }
+
+</style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">🩺</span>
+                <div><h1>RPrep</h1><p>Your Nursing Success Partner</p></div>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="solutionsContent">
+        <div class="solutions-container">
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>Loading solutions...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🩺 RPrep</h4>
+                <p>Empowering future nurses.</p>
+            </div>
+        </div>
+        <div class="copyright">© 2026 RPrep - All rights reserved.</div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'login.html';
+            });
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const results = JSON.parse(sessionStorage.getItem('testResults') || '{}');
+            
+            if (!results.questions) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            const solutionsContent = document.getElementById('solutionsContent');
+            let solutionsHTML = `
+                <div class="solutions-container">
+                    <h2 style="margin-bottom:1.5rem;">📖 Question Solutions</h2>
+            `;
+            
+            results.questions.forEach((q, idx) => {
+                const isCorrect = results.userAnswers[idx] === q.correct;
+                const userAnswer = results.userAnswers[idx];
+                solutionsHTML += `
+                    <div class="solution-card ${isCorrect ? 'correct' : 'wrong'}">
+                        <div class="question-text">Q${idx + 1}. ${q.text}</div>
+                        <div class="user-answer ${isCorrect ? 'correct' : 'wrong'}">
+                            Your answer: ${userAnswer !== null ? 
+                                String.fromCharCode(65 + userAnswer) + '. ' + q.options[userAnswer] : 
+                                'Not answered'}
+                        </div>
+                        ${!isCorrect ? `
+                            <div class="correct-answer">
+                                ✓ Correct answer: ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            solutionsHTML += `
+                    <div style="text-align:center; margin-top:2rem; margin-bottom:2rem;">
+                        <a href="dashboard.html" style="background:#1e3c72; color:white; padding:0.8rem 1.5rem; border-radius:50px; text-decoration:none; display:inline-block;">
+                            ← Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            solutionsContent.innerHTML = solutionsHTML;
+        });
+    </script>
+</body>
+</html>

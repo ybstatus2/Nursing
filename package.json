@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/ybstatus2/Nursing#readme",
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "firebase": "^12.13.0"
   }
 }
