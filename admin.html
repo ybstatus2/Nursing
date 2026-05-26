@@ -89,6 +89,7 @@
 
       <textarea id="questions" rows="12" placeholder='Questions JSON here'></textarea>
 
+      <button onclick="showJsonFormat()">JSON Format</button>
       <button onclick="validateQuestionsJson()">Validate JSON</button>
       <button onclick="shufflePreview()">Shuffle Preview %</button>
       <button onclick="uploadTest()">Upload Test</button>
@@ -198,6 +199,34 @@ function shuffleArray(arr){
     .sort((a,b) => a.sort - b.sort)
     .map(({v}) => v);
 }
+
+
+window.showJsonFormat = function(){
+  const sample = [
+    {
+      question: "Which vitamin is essential for blood clotting?",
+      options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin K"],
+      correct: 3,
+      explanation: "Vitamin K is essential for synthesis of clotting factors.",
+      subject: "MSN",
+      topic: "Nutrition",
+      difficulty: "Easy"
+    },
+    {
+      question: "Normal adult pulse rate is:",
+      options: ["40-60/min", "60-100/min", "100-120/min", "120-140/min"],
+      correct: 1,
+      explanation: "Normal adult pulse rate is 60-100 beats per minute.",
+      subject: "Fundamentals",
+      topic: "Vital Signs",
+      difficulty: "Easy"
+    }
+  ];
+
+  document.getElementById("questions").value = JSON.stringify(sample, null, 2);
+  document.getElementById("jsonReport").innerHTML =
+    "<b>JSON format added.</b><br>Edit this sample and paste your full questions.";
+};
 
 function getQuestionsFromBox(){
   const raw = document.getElementById("questions").value.trim();
