@@ -1190,23 +1190,56 @@ export default function App() {
         </main>
       )}
 
-      {screen === "result" && result && (
-        <main className="page">
-          <div className="resultCard">
-            <h1>{result.percentage}%</h1>
-            <p>Score: {result.score}/{result.total}</p>
-            <button onClick={() => setScreen("home")}>Go Home</button>
-          </div>
 
-          <h3>Solutions</h3>
-          {result.questions.map((item, i) => (
-            <div className="solution" key={i}>
-              <b>{item.question}</b>
-              <p>Your Answer: {answers[i] !== null ? item.options[answers[i]] : "Not answered"}</p>
-              <p>Correct Answer: {item.options[item.correct]}</p>
-              <small>{item.explanation}</small>
-            </div>
-          ))}
+      {screen === "result" && result && (
+        <main className="resultPage">
+          <section className="resultHero">
+            <small>Test Completed</small>
+            <h1>{result.percentage}%</h1>
+            <p>{result.subject_name || "Nursing Practice Test"}</p>
+          </section>
+
+          <section className="resultStatsGrid">
+            <div><span>✅</span><b>{result.score}</b><small>Correct</small></div>
+            <div><span>❌</span><b>{result.total - result.score}</b><small>Wrong / Skipped</small></div>
+            <div><span>📝</span><b>{result.total}</b><small>Total Questions</small></div>
+            <div><span>🎯</span><b>{result.percentage}%</b><small>Percentage</small></div>
+          </section>
+
+          <section className="resultActions">
+            <button onClick={() => setScreen("home")}>Go Home</button>
+            <button onClick={() => setScreen("results")}>View Scorecard</button>
+            <button onClick={() => setScreen("subjects")}>Practice More</button>
+          </section>
+
+          <h3 className="sectionHeading">Solutions & Review</h3>
+
+          <div className="solutionList">
+            {result.questions.map((item, i) => {
+              const userAns = answers[i];
+              const correctAns = Number(item.correct);
+              const isCorrect = userAns === correctAns;
+
+              return (
+                <div className={isCorrect ? "solutionItem correct" : "solutionItem wrong"} key={i}>
+                  <div className="solutionTop">
+                    <b>Q{i + 1}. {item.question}</b>
+                    <span>{isCorrect ? "Correct" : "Review"}</span>
+                  </div>
+
+                  <p><strong>Your Answer:</strong> {userAns !== null ? item.options[userAns] : "Not answered"}</p>
+                  <p><strong>Correct Answer:</strong> {item.options[correctAns]}</p>
+
+                  {item.explanation && (
+                    <div className="explanationBox">
+                      <strong>Explanation:</strong>
+                      <p>{item.explanation}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </main>
       )}
 
