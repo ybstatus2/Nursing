@@ -87,7 +87,7 @@ export default function App() {
         await loadLeaderboard();
         await loadDoubts(u.uid);
         await loadProfile(u);
-        await checkAppUpdate();
+        // await checkAppUpdate(false);
       }
     });
     return () => unsub();
@@ -110,17 +110,24 @@ export default function App() {
     return () => clearInterval(timer);
   }, [screen, selectedTest, answers]);
 
-  async function checkAppUpdate() {
+  async function checkAppUpdate(showMessage = true) {
     try {
       const snap = await getDoc(doc(db, "app_config", "version"));
-      if (!snap.exists()) return;
+      if (!snap.exists()) {
+        if (showMessage) alert("Update configuration not found");
+        return;
+      }
+
       const data = snap.data();
 
       if (Number(data.latestVersion || 1) > APP_VERSION) {
         setUpdateInfo(data);
+      } else {
+        if (showMessage) alert("Your app is already up to date");
       }
     } catch (e) {
       console.log(e);
+      if (showMessage) alert("Update check failed: " + e.message);
     }
   }
 
@@ -285,9 +292,44 @@ export default function App() {
     return Object.values(map);
   }, [tests]);
 
+  function todayDateString() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function isUnlocked(test) {
+    if (!test.unlockDate) return true;
+    return String(test.unlockDate) <= todayDateString();
+  }
+
+  function openSeries(seriesId, seriesName, mode = "allUnlocked") {
+    setSelectedSubject({
+      id: seriesId,
+      name: seriesName,
+      isSeries: true,
+      mode
+    });
+    setScreen("testList");
+  }
+
   const subjectTests = useMemo(() => {
     if (!selectedSubject) return [];
-    return tests.filter(t => t.subject_id === selectedSubject.id);
+
+    let list = tests.filter(t => {
+      if (selectedSubject.isSeries) {
+        return t.series_id === selectedSubject.id;
+      }
+      return t.subject_id === selectedSubject.id;
+    });
+
+    if (selectedSubject.isSeries) {
+      list = list.filter(isUnlocked);
+
+      if (selectedSubject.mode === "todayOnly") {
+        list = list.filter(t => String(t.unlockDate || "") === todayDateString());
+      }
+    }
+
+    return list.sort((a, b) => Number(a.test_number || 0) - Number(b.test_number || 0));
   }, [tests, selectedSubject]);
 
   const totalTests = tests.length;
@@ -679,6 +721,14 @@ export default function App() {
           <p className="muted">Select test to begin.</p>
 
           <div className="list">
+            {subjectTests.length === 0 && (
+              <div className="empty">
+                {selectedSubject?.isSeries
+                  ? "Aaj ka test abhi available nahi hai. Please unlock date ke according test add karo."
+                  : "No tests available"}
+              </div>
+            )}
+
             {subjectTests.map(t => (
               <button className="testCard" key={t.id} onClick={() => startTest(t)}>
                 <b>Test {t.test_number}</b>
@@ -699,28 +749,28 @@ export default function App() {
               <div className="seriesIcon">🌅</div>
               <h3>Daily Morning Test</h3>
               <p>Start your day with daily CBT practice.</p>
-              <button>Coming Soon</button>
+              <button onClick={() => openSeries("daily_morning", "Daily Morning Test", "todayOnly")}>Open Test</button>
             </div>
 
             <div className="seriesCard">
               <div className="seriesIcon">🌙</div>
               <h3>Daily Evening Test</h3>
               <p>Revise and practice every evening.</p>
-              <button>Coming Soon</button>
+              <button onClick={() => openSeries("daily_evening", "Daily Evening Test", "todayOnly")}>Open Test</button>
             </div>
 
             <div className="seriesCard">
               <div className="seriesIcon">🔥</div>
               <h3>365 Days Challenge</h3>
               <p>One year complete nursing exam preparation.</p>
-              <button>Open Challenge</button>
+              <button onClick={() => openSeries("365_days", "365 Days Challenge", "allUnlocked")}>Open Challenge</button>
             </div>
 
             <div className="seriesCard">
               <div className="seriesIcon">🎯</div>
               <h3>NORCET 100 Days Challenge</h3>
               <p>High-yield NORCET focused test practice.</p>
-              <button>Open Challenge</button>
+              <button onClick={() => openSeries("norcet_100_days", "NORCET 100 Days Challenge", "allUnlocked")}>Open Challenge</button>
             </div>
           </section>
         </main>
