@@ -2144,3 +2144,32 @@ input,textarea,select{
   font-weight:700;
   margin:0;
 }
+
+/* FAQ PAGE */
+.faqList{
+  margin-top:18px;
+  display:grid;
+  gap:14px;
+}
+
+.faqItem{
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 18px 45px rgba(7,27,69,.10);
+}
+
+.faqItem h3{
+  margin:0 0 8px;
+  color:#071b45;
+  font-size:17px;
+}
+
+.faqItem p{
+  margin:0;
+  color:#667085;
+  line-height:1.6;
+  font-weight:700;
+}

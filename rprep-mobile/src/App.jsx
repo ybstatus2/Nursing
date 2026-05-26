@@ -411,6 +411,7 @@ export default function App() {
                 <button onClick={() => { setScreen("privacy"); setMenuOpen(false); }}>🔐 Privacy Policy</button>
                 <button onClick={() => { setScreen("terms"); setMenuOpen(false); }}>📄 Terms & Conditions</button>
                 <button onClick={() => { setScreen("disclaimer"); setMenuOpen(false); }}>⚠️ Disclaimer</button>
+                <button onClick={() => { setScreen("faq"); setMenuOpen(false); }}>❔ FAQ</button>
                 <button onClick={() => { checkAppUpdate(); setMenuOpen(false); }}>🔄 Check Update</button>
                 <button className="logoutMenuBtn" onClick={logout}>🚪 Logout</button>
               </div>
@@ -767,6 +768,46 @@ export default function App() {
 
             <h3>External Links</h3>
             <p>RPrep may contain external links. We are not responsible for external website content or policies.</p>
+          </section>
+        </main>
+      )}
+
+
+      {screen === "faq" && (
+        <main className="page withNav">
+          <h2>FAQ</h2>
+          <p className="muted">Frequently asked questions about RPrep.</p>
+
+          <section className="faqList">
+            <div className="faqItem">
+              <h3>What is RPrep?</h3>
+              <p>RPrep is a nursing exam preparation app designed for practice tests, score tracking, test series, doubt support and exam-focused preparation.</p>
+            </div>
+
+            <div className="faqItem">
+              <h3>Which exams are covered?</h3>
+              <p>RPrep focuses on RRB Nursing Superintendent, NORCET, Staff Nurse, Nursing Officer, Nursing Tutor and other government nursing exams.</p>
+            </div>
+
+            <div className="faqItem">
+              <h3>Is RPrep officially connected with RRB or AIIMS?</h3>
+              <p>No. RPrep is an independent educational platform and is not officially affiliated with RRB, AIIMS, NORCET or any government recruitment body.</p>
+            </div>
+
+            <div className="faqItem">
+              <h3>Where is my test score saved?</h3>
+              <p>Your test score is saved securely in your account and shown in the Scorecard section.</p>
+            </div>
+
+            <div className="faqItem">
+              <h3>How can I submit a doubt?</h3>
+              <p>You can open the Doubt Support page from the menu and submit your subject-wise question.</p>
+            </div>
+
+            <div className="faqItem">
+              <h3>Does RPrep guarantee selection?</h3>
+              <p>No. RPrep helps with preparation and practice, but exam success depends on your study, official exam pattern and competition.</p>
+            </div>
           </section>
         </main>
       )}
