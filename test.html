@@ -2,57 +2,516 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Exam - RPrep Nursing Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>CBT Exam - RPrep</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#f5f7fa 0%,#e4e8f0 100%);min-height:100vh;}
-        .exam-container{max-width:1400px;margin:0 auto;padding:1rem;min-height:100vh;display:flex;gap:1.5rem;flex-wrap:wrap;}
-        .question-area{flex:2;min-width:280px;background:white;border-radius:1.5rem;padding:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-        .timer-bar{background:#1e3c72;color:white;padding:0.8rem 1.5rem;border-radius:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;}
-        .timer-display{font-size:1.5rem;font-weight:700;font-family:monospace;background:rgba(0,0,0,0.3);padding:0.3rem 1rem;border-radius:2rem;}
-        .question-text{font-size:1.2rem;font-weight:600;color:#1e3c72;margin-bottom:1.5rem;line-height:1.5;}
-        .options-list{display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;}
-        .option{display:flex;align-items:center;gap:1rem;padding:1rem;background:#f8f9fc;border-radius:1rem;cursor:pointer;transition:all 0.3s;border:2px solid transparent;}
-        .option:hover{background:#e8f0fe;transform:translateX(5px);}
-        .option.selected{background:#e8f0fe;border-color:#e74c3c;}
-        .option-prefix{font-weight:700;color:#1e3c72;width:35px;height:35px;display:flex;align-items:center;justify-content:center;background:white;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-        .option.selected .option-prefix{background:#e74c3c;color:white;}
-        .option-text{flex:1;color:#333;}
-        .nav-buttons{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;}
-        .nav-btn{padding:0.8rem 1.5rem;border:none;border-radius:50px;font-weight:600;cursor:pointer;transition:all 0.3s;}
-        .prev-btn{background:#e0e0e0;color:#333;}
-        .next-btn{background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;}
-        .mark-btn{background:#ffc107;color:#333;}
-        .skip-btn{background:#6c757d;color:white;}
-        .submit-btn{background:linear-gradient(135deg,#e74c3c,#c0392b);color:white;margin-left:auto;}
-        .palette-area{width:300px;background:white;border-radius:1.5rem;padding:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.1);height:fit-content;position:sticky;top:1rem;}
-        .palette-title{font-weight:700;margin-bottom:1rem;color:#1e3c72;text-align:center;}
-        .palette-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.5rem;margin-bottom:1rem;}
-        .palette-btn{aspect-ratio:1;border:none;border-radius:0.5rem;font-weight:600;cursor:pointer;background:#f0f0f0;color:#333;}
-        .palette-btn.current{background:#1e3c72;color:white;transform:scale(1.05);}
-        .palette-btn.answered{background:#2ecc71;color:white;}
-        .palette-btn.marked{background:#ffc107;color:#333;}
-        .palette-btn.not-answered{background:#e74c3c;color:white;}
-        .legend{display:flex;flex-wrap:wrap;gap:0.8rem;margin-top:1rem;padding-top:1rem;border-top:1px solid #e0e0e0;font-size:0.7rem;}
-        .legend-item{display:flex;align-items:center;gap:0.3rem;}
-        .legend-color{width:15px;height:15px;border-radius:3px;}
-        .loading-container{text-align:center;padding:4rem;}
-        .spinner{width:50px;height:50px;border:4px solid #e0e0e0;border-top-color:#e74c3c;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem;}
-        @keyframes spin{to{transform:rotate(360deg);}}
-        @media (max-width:768px){.exam-container{flex-direction:column;}.palette-area{width:100%;position:static;}}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            overflow-x: hidden;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* LANDSCAPE WARNING - Full Screen Block */
+        .landscape-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .landscape-warning i {
+            font-size: 70px;
+            animation: rotateAnim 2s ease infinite;
+        }
+
+        .landscape-warning h2 {
+            font-size: 24px;
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+
+        .landscape-warning p {
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        @keyframes rotateAnim {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        /* Main Exam Container - Only Visible in Landscape */
+        .exam-wrapper {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: #f0f2f5;
+            overflow: hidden;
+        }
+
+        /* Landscape Mode Active */
+        @media (orientation: landscape) {
+            .landscape-warning {
+                display: none !important;
+            }
+            .exam-wrapper {
+                display: flex !important;
+                flex-direction: column;
+            }
+        }
+
+        /* Portrait Mode - Show Warning Only */
+        @media (orientation: portrait) {
+            .landscape-warning {
+                display: flex !important;
+            }
+            .exam-wrapper {
+                display: none !important;
+            }
+        }
+
+        /* ========== CBT EXAM STYLES ========== */
+        .exam-header {
+            background: #ffffff;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e0e4e8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+
+        .exam-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .exam-title span {
+            color: #e74c3c;
+        }
+
+        .timer-area {
+            background: #1e3c72;
+            padding: 6px 16px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .timer-area.warning {
+            background: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Main Content Area */
+        .exam-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 12px;
+            gap: 12px;
+        }
+
+        /* Question Area */
+        .question-section {
+            flex: 3;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .question-header {
+            background: #f8f9fc;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e0e4e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .q-num {
+            font-weight: 700;
+            color: #1e3c72;
+            font-size: 14px;
+        }
+
+        .q-num span {
+            background: #1e3c72;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-right: 8px;
+        }
+
+        .mark-btn {
+            background: #ffc10720;
+            border: 1px solid #ffc107;
+            color: #d4a000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .mark-btn.marked {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .question-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background: #eef2ff;
+        }
+
+        .option.selected {
+            background: #eef2ff;
+            border-color: #1e3c72;
+        }
+
+        .option-prefix {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #1e3c72;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .option.selected .option-prefix {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .option-text {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            padding: 12px 20px;
+            border-top: 1px solid #e0e4e8;
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            background: #f8f9fc;
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cbt-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #ccc;
+        }
+
+        .btn-next {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #2a5298;
+        }
+
+        .btn-mark {
+            background: #ffc10720;
+            color: #d4a000;
+            border: 1px solid #ffc107;
+        }
+
+        .btn-mark.marked-active {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-submit {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #c0392b;
+        }
+
+        .btn-prev:disabled, .btn-next:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Palette Area - Right Side */
+        .palette-section {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 240px;
+        }
+
+        .palette-header {
+            background: #f8f9fc;
+            padding: 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: #1e3c72;
+            border-bottom: 1px solid #e0e4e8;
+        }
+
+        .palette-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+        }
+
+        .palette-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.15s;
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .palette-btn.answered {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .palette-btn.marked {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .palette-btn.current {
+            background: #1e3c72;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #1e3c72;
+        }
+
+        .palette-btn.not-answered {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .legend {
+            padding: 10px 15px;
+            border-top: 1px solid #e0e4e8;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        /* Scrollbar */
+        .question-body::-webkit-scrollbar, .palette-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .question-body::-webkit-scrollbar-track, .palette-grid::-webkit-scrollbar-track {
+            background: #e0e4e8;
+            border-radius: 5px;
+        }
+
+        .question-body::-webkit-scrollbar-thumb, .palette-grid::-webkit-scrollbar-thumb {
+            background: #1e3c72;
+            border-radius: 5px;
+        }
+
+        /* Compact Mode for smaller screens */
+        @media (max-width: 900px) {
+            .question-text { font-size: 14px; }
+            .option-text { font-size: 12px; }
+            .option { padding: 8px 12px; }
+            .cbt-btn { padding: 6px 12px; font-size: 11px; }
+            .palette-btn { font-size: 11px; }
+        }
+
+        @media (max-width: 700px) {
+            .exam-main { gap: 8px; }
+            .palette-section { min-width: 200px; }
+            .palette-grid { gap: 5px; }
+            .palette-btn { font-size: 10px; }
+        }
+
+        /* Loading */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #e74c3c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div id="examContent"><div class="loading-container"><div class="spinner"></div><p>Loading exam...</p></div></div>
+
+    <!-- Landscape Warning Screen -->
+    <div class="landscape-warning" id="landscapeWarning">
+        <i class="fas fa-rotate-right"></i>
+        <h2>Rotate Your Device</h2>
+        <p>Please rotate your device to Landscape Mode<br>for the best CBT exam experience</p>
+        <p style="font-size: 12px; margin-top: 20px;">Test will start automatically after rotation</p>
+    </div>
+
+    <!-- Main Exam Container -->
+    <div class="exam-wrapper" id="examWrapper">
+        <div id="examContent">
+            <div class="loading-container">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
 
     <script>
+        // Orientation change handler - Refresh page when rotated to landscape
+        let lastOrientation = window.screen.orientation?.type || (window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
+        
+        function handleOrientationChange() {
+            const currentOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+            
+            if (currentOrientation === 'landscape' && lastOrientation === 'portrait') {
+                // Page just rotated to landscape - refresh to ensure proper rendering
+                window.location.reload();
+            }
+            lastOrientation = currentOrientation;
+        }
+        
+        window.addEventListener('resize', handleOrientationChange);
+        window.addEventListener('orientationchange', handleOrientationChange);
+        
         let currentUser = null;
         let questions = [];
         let currentIndex = 0;
@@ -60,43 +519,53 @@
         let markedForReview = [];
         let timer = null;
         let timeLeft = 0;
-        const STORAGE_KEY = `exam_${Date.now()}`;
         
         const urlParams = new URLSearchParams(window.location.search);
         const testSubject = urlParams.get('subject') || sessionStorage.getItem('testSubject') || 'Nursing';
         const testId = urlParams.get('test') || sessionStorage.getItem('testId') || '1';
         const testTopic = urlParams.get('topic') || sessionStorage.getItem('testTopic') || 'General';
         
-        // Load questions from sessionStorage
+        // Load stored questions
         const storedQuestions = sessionStorage.getItem('testQuestions');
         if (storedQuestions) {
             questions = JSON.parse(storedQuestions);
         } else {
-            // Fallback sample questions
+            // CBT Style Sample Questions
             questions = [
-                { text: "Sample Question 1", options: ["Option A", "Option B", "Option C", "Option D"], correct: 0 },
-                { text: "Sample Question 2", options: ["Option A", "Option B", "Option C", "Option D"], correct: 1 }
+                { text: "A patient presents with chest pain radiating to left arm. What is the most likely diagnosis?", options: ["Angina Pectoris", "Myocardial Infarction", "Pericarditis", "GERD"], correct: 1 },
+                { text: "Which of the following is the first-line treatment for hypertension?", options: ["ACE Inhibitors", "Beta Blockers", "Calcium Channel Blockers", "Thiazide Diuretics"], correct: 3 },
+                { text: "Normal adult respiratory rate is:", options: ["8-12 breaths/min", "12-20 breaths/min", "20-28 breaths/min", "28-36 breaths/min"], correct: 1 },
+                { text: "Which artery is palpated to check pulse in an unconscious patient?", options: ["Radial", "Brachial", "Carotid", "Femoral"], correct: 2 },
+                { text: "The universal donor blood group is:", options: ["A", "B", "AB", "O"], correct: 3 }
             ];
         }
         
         userAnswers = new Array(questions.length).fill(null);
-        markedForReview = [];
+        markedForReview = new Array(questions.length).fill(false);
         currentIndex = 0;
-        timeLeft = questions.length * 90; // 1.5 min per question
+        timeLeft = questions.length * 75;
         
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (!user) { window.location.href = 'login.html'; return; }
             currentUser = user;
             startExam();
         });
         
-        function startExam() { startTimer(); renderExam(); }
+        function startExam() {
+            startTimer();
+            renderExam();
+        }
         
         function startTimer() {
             if (timer) clearInterval(timer);
             timer = setInterval(() => {
-                if (timeLeft <= 0) { clearInterval(timer); submitExam(); }
-                else { timeLeft--; updateTimerDisplay(); }
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    submitExam();
+                } else {
+                    timeLeft--;
+                    updateTimerDisplay();
+                }
             }, 1000);
         }
         
@@ -104,7 +573,12 @@
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             const timerEl = document.getElementById('timerDisplay');
-            if (timerEl) timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+            if (timerEl) {
+                timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+                if (timeLeft < 300) {
+                    timerEl.classList.add('warning');
+                }
+            }
         }
         
         function renderExam() {
@@ -112,59 +586,187 @@
             const question = questions[currentIndex];
             if (!question) return;
             
+            // Build palette
             let paletteHTML = '';
             questions.forEach((_, idx) => {
                 let statusClass = 'not-answered';
                 if (userAnswers[idx] !== null) statusClass = 'answered';
-                else if (markedForReview.includes(idx)) statusClass = 'marked';
+                else if (markedForReview[idx]) statusClass = 'marked';
                 if (idx === currentIndex) statusClass = 'current';
                 paletteHTML += `<button class="palette-btn ${statusClass}" onclick="goToQuestion(${idx})">${idx+1}</button>`;
             });
             
-            // Handle options (support both array format and a,b,c,d format)
             let options = question.options;
             if (!options && question.a) {
                 options = [question.a, question.b, question.c, question.d];
             }
             
+            const isMarked = markedForReview[currentIndex];
+            
             container.innerHTML = `
-                <div class="exam-container">
-                    <div class="question-area">
-                        <div class="timer-bar"><span><i class="fas fa-clock"></i> Time Remaining</span><span class="timer-display" id="timerDisplay">00:00</span></div>
-                        <div class="question-text"><span style="background:#e74c3c;color:white;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.8rem;">Q${currentIndex+1}/${questions.length}</span><div style="margin-top:0.8rem;">${question.text}</div></div>
-                        <div class="options-list">${options.map((opt, idx) => `<div class="option ${userAnswers[currentIndex] === idx ? 'selected' : ''}" onclick="selectOption(${idx})"><span class="option-prefix">${String.fromCharCode(65+idx)}</span><span class="option-text">${opt}</span></div>`).join('')}</div>
-                        <div class="nav-buttons">
-                            <button class="nav-btn prev-btn" onclick="prevQuestion()" ${currentIndex===0?'disabled style="opacity:0.5"':''}>← Previous</button>
-                            <button class="nav-btn mark-btn" onclick="markQuestion()"><i class="fas fa-flag"></i> Mark</button>
-                            <button class="nav-btn skip-btn" onclick="nextQuestion()">Skip →</button>
-                            <button class="nav-btn next-btn" onclick="nextQuestion()">Save & Next →</button>
-                            <button class="nav-btn submit-btn" onclick="submitExam()"><i class="fas fa-check-circle"></i> Submit</button>
+                <div style="height:100vh; display:flex; flex-direction:column;">
+                    <div class="exam-header">
+                        <div class="exam-title">
+                            <i class="fas fa-stethoscope"></i> RPrep CBT | <span>${testSubject}</span> | ${testTopic}
+                        </div>
+                        <div class="timer-area" id="timerDisplay">00:00</div>
+                    </div>
+                    
+                    <div class="exam-main">
+                        <!-- Question Area -->
+                        <div class="question-section">
+                            <div class="question-header">
+                                <div class="q-num">
+                                    <span>Q${currentIndex+1}/${questions.length}</span>
+                                    ${testTopic}
+                                </div>
+                                <button class="mark-btn ${isMarked ? 'marked' : ''}" onclick="toggleMark()">
+                                    <i class="fas fa-flag"></i> ${isMarked ? 'Marked for Review' : 'Mark for Review'}
+                                </button>
+                            </div>
+                            <div class="question-body">
+                                <div class="question-text">${question.text}</div>
+                                <div class="options-list">
+                                    ${options.map((opt, idx) => `
+                                        <div class="option ${userAnswers[currentIndex] === idx ? 'selected' : ''}" onclick="selectOption(${idx})">
+                                            <span class="option-prefix">${String.fromCharCode(65+idx)}</span>
+                                            <span class="option-text">${opt}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="nav-buttons">
+                                <div class="nav-left">
+                                    <button class="cbt-btn btn-prev" onclick="prevQuestion()" ${currentIndex===0 ? 'disabled' : ''}>← Previous</button>
+                                    <button class="cbt-btn btn-mark ${isMarked ? 'marked-active' : ''}" onclick="toggleMark()"><i class="fas fa-flag"></i> Mark</button>
+                                </div>
+                                <div class="nav-right">
+                                    <button class="cbt-btn btn-next" onclick="nextQuestion()" ${currentIndex===questions.length-1 ? 'disabled' : ''}>Save & Next →</button>
+                                    <button class="cbt-btn btn-submit" onclick="submitExam()">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Palette Area -->
+                        <div class="palette-section">
+                            <div class="palette-header">
+                                <i class="fas fa-th"></i> Question Palette
+                            </div>
+                            <div class="palette-grid">
+                                ${paletteHTML}
+                            </div>
+                            <div class="legend">
+                                <div class="legend-item"><div class="legend-color" style="background:#2ecc71;"></div> Answered</div>
+                                <div class="legend-item"><div class="legend-color" style="background:#e74c3c;"></div> Not Answered</div>
+                                <div class="legend-item"><div class="legend-color" style="background:#ffc107;"></div> Marked</div>
+                                <div class="legend-item"><div class="legend-color" style="background:#1e3c72;"></div> Current</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="palette-area"><div class="palette-title">📋 Question Palette</div><div class="palette-grid">${paletteHTML}</div><div class="legend"><div class="legend-item"><div class="legend-color" style="background:#2ecc71;"></div> Answered</div><div class="legend-item"><div class="legend-color" style="background:#e74c3c;"></div> Not Answered</div><div class="legend-item"><div class="legend-color" style="background:#ffc107;"></div> Marked</div><div class="legend-item"><div class="legend-color" style="background:#1e3c72;"></div> Current</div></div></div>
-                </div>`;
+                </div>
+            `;
             updateTimerDisplay();
         }
         
-        function selectOption(optionIndex) { userAnswers[currentIndex] = optionIndex; renderExam(); }
-        function markQuestion() { if(markedForReview.includes(currentIndex)) markedForReview = markedForReview.filter(i=>i!==currentIndex); else markedForReview.push(currentIndex); renderExam(); }
-        function nextQuestion() { if(currentIndex < questions.length-1) { currentIndex++; renderExam(); } }
-        function prevQuestion() { if(currentIndex > 0) { currentIndex--; renderExam(); } }
-        function goToQuestion(index) { currentIndex = index; renderExam(); }
+        function selectOption(optionIndex) {
+            userAnswers[currentIndex] = optionIndex;
+            renderExam();
+            saveToSession();
+        }
+        
+        function toggleMark() {
+            markedForReview[currentIndex] = !markedForReview[currentIndex];
+            renderExam();
+            saveToSession();
+        }
+        
+        function nextQuestion() {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderExam();
+                saveToSession();
+            }
+        }
+        
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderExam();
+                saveToSession();
+            }
+        }
+        
+        function goToQuestion(index) {
+            currentIndex = index;
+            renderExam();
+            saveToSession();
+        }
+        
+        function saveToSession() {
+            sessionStorage.setItem('testUserAnswers', JSON.stringify(userAnswers));
+            sessionStorage.setItem('testMarkedForReview', JSON.stringify(markedForReview));
+            sessionStorage.setItem('testCurrentIndex', currentIndex);
+            sessionStorage.setItem('testTimeLeft', timeLeft);
+        }
+        
+        function loadFromSession() {
+            const savedAnswers = sessionStorage.getItem('testUserAnswers');
+            const savedMarked = sessionStorage.getItem('testMarkedForReview');
+            const savedIndex = sessionStorage.getItem('testCurrentIndex');
+            const savedTime = sessionStorage.getItem('testTimeLeft');
+            
+            if (savedAnswers) userAnswers = JSON.parse(savedAnswers);
+            if (savedMarked) markedForReview = JSON.parse(savedMarked);
+            if (savedIndex) currentIndex = parseInt(savedIndex);
+            if (savedTime) timeLeft = parseInt(savedTime);
+        }
         
         function submitExam() {
+            if (!confirm('Are you sure you want to submit the test?')) return;
+            
             clearInterval(timer);
             let correctCount = 0;
             questions.forEach((q, idx) => {
                 const correct = q.correct !== undefined ? q.correct : (q.answer ? parseInt(q.answer) : 0);
                 if (userAnswers[idx] === correct) correctCount++;
             });
-            const score = correctCount, total = questions.length, percentage = Math.round((score/total)*100);
-            const results = { subject: testSubject, testId, topic: testTopic, score, total, percentage, questions, userAnswers, date: new Date().toISOString() };
+            
+            const score = correctCount;
+            const total = questions.length;
+            const percentage = Math.round((score / total) * 100);
+            
+            const results = {
+                subject: testSubject,
+                testId: testId,
+                topic: testTopic,
+                score: score,
+                total: total,
+                percentage: percentage,
+                questions: questions,
+                userAnswers: userAnswers,
+                markedForReview: markedForReview,
+                date: new Date().toISOString()
+            };
+            
             sessionStorage.setItem('testResults', JSON.stringify(results));
-            if(currentUser) db.collection('results').add({ userId: currentUser.uid, subject: testSubject, testId, score, total, percentage, date: new Date() });
+            
+            if (currentUser) {
+                db.collection('results').add({
+                    userId: currentUser.uid,
+                    subject: testSubject,
+                    testId: testId,
+                    score: score,
+                    total: total,
+                    percentage: percentage,
+                    date: new Date()
+                }).catch(e => console.log(e));
+            }
+            
             window.location.href = 'result.html';
         }
+        
+        // Load saved progress if exists
+        loadFromSession();
     </script>
 </body>
 </html>
