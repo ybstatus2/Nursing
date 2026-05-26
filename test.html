@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CBT Exam - RPrep</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -13,22 +13,29 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: #f0f2f5;
-            width: 100%;
-            min-height: 100vh;
         }
 
-        /* ========== LANDSCAPE WARNING ========== */
+        /* ========== LANDSCAPE WARNING - FULL SCREEN ========== */
         .rotate-warning {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, #1e3c72, #2a5298);
             color: white;
             z-index: 99999;
@@ -37,22 +44,37 @@
             justify-content: center;
             text-align: center;
             flex-direction: column;
+            padding: 20px;
+        }
+
+        .rotate-warning .warning-inner {
+            max-width: 90%;
+            margin: 0 auto;
         }
 
         .rotate-warning i {
-            font-size: 70px;
+            font-size: 60px;
             animation: rotateAnim 2s ease infinite;
+            display: inline-block;
         }
 
         .rotate-warning h2 {
-            font-size: 24px;
+            font-size: 22px;
             margin-top: 20px;
+            font-weight: 600;
         }
 
         .rotate-warning p {
             font-size: 14px;
-            margin-top: 10px;
-            opacity: 0.8;
+            margin-top: 12px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .rotate-warning .small-note {
+            font-size: 11px;
+            margin-top: 20px;
+            opacity: 0.7;
         }
 
         @keyframes rotateAnim {
@@ -84,24 +106,28 @@
         .exam-main-container {
             display: none;
             width: 100%;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             background: #f0f2f5;
         }
 
         .exam-header {
             background: #ffffff;
-            padding: 8px 20px;
+            padding: 6px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #e0e4e8;
-            flex-shrink: 0;
+            border-bottom: 1px solid #e0e4e8;
+            height: 50px;
         }
 
         .exam-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: #1e3c72;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .exam-title span {
@@ -110,11 +136,11 @@
 
         .timer-area {
             background: #1e3c72;
-            padding: 6px 16px;
-            border-radius: 30px;
+            padding: 4px 12px;
+            border-radius: 20px;
             color: white;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 16px;
             font-family: monospace;
         }
 
@@ -130,53 +156,54 @@
 
         .exam-main {
             display: flex;
-            padding: 12px;
-            gap: 12px;
-            min-height: calc(100vh - 55px);
+            padding: 8px;
+            gap: 8px;
+            height: calc(100vh - 50px);
+            overflow: hidden;
         }
 
         .question-section {
             flex: 3;
             background: white;
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
 
         .question-header {
             background: #f8f9fc;
-            padding: 12px 20px;
+            padding: 8px 12px;
             border-bottom: 1px solid #e0e4e8;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
         .q-num {
             font-weight: 700;
             color: #1e3c72;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .q-num span {
             background: #1e3c72;
             color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            margin-right: 8px;
+            padding: 2px 8px;
+            border-radius: 15px;
+            margin-right: 6px;
+            font-size: 11px;
         }
 
         .mark-btn {
             background: #ffc10720;
             border: 1px solid #ffc107;
             color: #d4a000;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 10px;
             font-weight: 600;
             cursor: pointer;
         }
@@ -188,33 +215,33 @@
 
         .question-body {
             flex: 1;
-            padding: 20px;
+            padding: 12px;
             overflow-y: auto;
         }
 
         .question-text {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             color: #1a1a2e;
-            line-height: 1.5;
-            margin-bottom: 24px;
+            line-height: 1.4;
+            margin-bottom: 16px;
         }
 
         .options-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
         }
 
         .option {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
+            gap: 10px;
+            padding: 8px 12px;
             background: #f8f9fc;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            border: 2px solid transparent;
+            border: 1px solid transparent;
         }
 
         .option:hover {
@@ -227,14 +254,15 @@
         }
 
         .option-prefix {
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
+            font-size: 12px;
             color: #1e3c72;
         }
 
@@ -245,25 +273,25 @@
 
         .option-text {
             flex: 1;
-            font-size: 14px;
+            font-size: 12px;
             color: #333;
         }
 
         .nav-buttons {
-            padding: 12px 20px;
+            padding: 8px 12px;
             border-top: 1px solid #e0e4e8;
             display: flex;
-            gap: 12px;
+            gap: 8px;
             justify-content: space-between;
             background: #f8f9fc;
         }
 
         .cbt-btn {
-            padding: 8px 18px;
+            padding: 6px 14px;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
         }
 
@@ -290,38 +318,37 @@
         .palette-section {
             flex: 1;
             background: white;
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            min-width: 240px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            min-width: 180px;
         }
 
         .palette-header {
             background: #f8f9fc;
-            padding: 12px;
+            padding: 8px;
             text-align: center;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 11px;
             color: #1e3c72;
             border-bottom: 1px solid #e0e4e8;
         }
 
         .palette-grid {
-            padding: 15px;
+            padding: 10px;
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            gap: 6px;
             overflow-y: auto;
         }
 
         .palette-btn {
             aspect-ratio: 1;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 11px;
             cursor: pointer;
             background: #f0f0f0;
             color: #333;
@@ -349,25 +376,25 @@
         }
 
         .legend {
-            padding: 10px 15px;
+            padding: 6px 10px;
             border-top: 1px solid #e0e4e8;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
 
         .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
         }
 
         .loading-container {
@@ -385,39 +412,34 @@
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e0e0e0;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
             border-top-color: #e74c3c;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 900px) {
-            .question-text { font-size: 14px; }
-            .option-text { font-size: 12px; }
-            .option { padding: 8px 12px; }
-            .cbt-btn { padding: 6px 12px; font-size: 11px; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- ROTATION WARNING - Only in Portrait -->
+    <!-- ROTATION WARNING -->
     <div class="rotate-warning">
-        <i class="fas fa-rotate-right"></i>
-        <h2>Rotate Your Device</h2>
-        <p>Please rotate your device to Landscape Mode<br>for the best CBT exam experience</p>
-        <p style="font-size: 12px; margin-top: 20px;">Test will start automatically after rotation</p>
+        <div class="warning-inner">
+            <i class="fas fa-rotate-right"></i>
+            <h2>Rotate Your Phone</h2>
+            <p>Please rotate your phone to <strong>Landscape / Horizontal Mode</strong><br>for the best CBT exam experience.</p>
+            <p class="small-note">ⓘ Test will start automatically after rotation</p>
+        </div>
     </div>
 
     <!-- MAIN EXAM CONTAINER -->
     <div class="exam-main-container" id="examContent">
         <div class="loading-container">
             <div class="spinner"></div>
-            <p style="margin-top: 15px;">Loading CBT Exam...</p>
+            <p style="margin-top: 12px;">Loading CBT Exam...</p>
         </div>
     </div>
 
@@ -533,7 +555,7 @@
             
             container.innerHTML = `
                 <div class="exam-header">
-                    <div class="exam-title"><i class="fas fa-stethoscope"></i> RPrep CBT | <span>${testSubject}</span> | ${testTopic}</div>
+                    <div class="exam-title"><i class="fas fa-stethoscope"></i> RPrep CBT | <span>${testSubject}</span></div>
                     <div class="timer-area" id="timerDisplay">00:00</div>
                 </div>
                 <div class="exam-main">
@@ -554,9 +576,9 @@
                             </div>
                         </div>
                         <div class="nav-buttons">
-                            <div><button class="cbt-btn btn-prev" onclick="prevQuestion()" ${currentIndex===0 ? 'disabled' : ''}>← Previous</button></div>
-                            <div><button class="cbt-btn btn-next" onclick="nextQuestion()" ${currentIndex===questions.length-1 ? 'disabled' : ''}>Save & Next →</button>
-                            <button class="cbt-btn btn-submit" onclick="submitExam()" style="margin-left:10px;">Submit</button></div>
+                            <button class="cbt-btn btn-prev" onclick="prevQuestion()" ${currentIndex===0 ? 'disabled' : ''}>← Previous</button>
+                            <button class="cbt-btn btn-next" onclick="nextQuestion()" ${currentIndex===questions.length-1 ? 'disabled' : ''}>Next →</button>
+                            <button class="cbt-btn btn-submit" onclick="submitExam()">Submit</button>
                         </div>
                     </div>
                     <div class="palette-section">
@@ -591,7 +613,7 @@
         function goToQuestion(index) { currentIndex = index; renderExam(); saveToSession(); }
         
         function submitExam() {
-            if (!confirm('Are you sure you want to submit the test?')) return;
+            if (!confirm('Submit test?')) return;
             clearInterval(timer);
             let correctCount = 0;
             questions.forEach((q, idx) => {
