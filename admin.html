@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPrep Admin Panel</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#102033}
+    .wrap{max-width:1100px;margin:auto;padding:20px}
+    .card{background:white;border-radius:22px;padding:20px;margin:14px 0;box-shadow:0 10px 30px #0001}
+    input,select,textarea{width:100%;padding:12px;margin:7px 0 14px;border:1px solid #d8e0ee;border-radius:12px;box-sizing:border-box}
+    button{background:#102a63;color:white;border:0;border-radius:12px;padding:12px 16px;font-weight:800;margin:4px;cursor:pointer}
+    .danger{background:#e53935}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .muted{color:#667}.hidden{display:none}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>RPrep Admin Panel</h1>
+    <p class="muted">Admin: pbhupeshk2022@gmail.com</p>
+
+    <section class="card">
+      <h2>Admin Login</h2>
+      <input id="email" type="email" value="pbhupeshk2022@gmail.com" placeholder="Admin Email">
+      <input id="password" type="password" placeholder="Password">
+      <button onclick="loginAdmin()">Login</button>
+      <button class="danger" onclick="logoutAdmin()">Logout</button>
+      <p id="loginStatus" class="muted">Not logged in</p>
+      <p id="uidBox" class="muted"></p>
+    </section>
+
+    <section class="card">
+      <h2>Upload Test</h2>
+
+      <div class="grid">
+        <div>
+          <label>Test Type</label>
+          <select id="subject_id">
+            <option value="daily_morning">Daily Morning Test</option>
+            <option value="daily_evening">Daily Evening Test</option>
+            <option value="365_days">365 Days Challenge</option>
+            <option value="norcet_100_days">NORCET 100 Days Challenge</option>
+            <option value="subject_test">Subject Test</option>
+          </select>
+        </div>
+        <div>
+          <label>Unlock Date</label>
+          <input id="unlockDate" type="date">
+        </div>
+      </div>
+
+      <div class="grid">
+        <input id="subject_name" placeholder="Subject Name">
+        <input id="topic_name" placeholder="Topic Name">
+      </div>
+
+      <div class="grid">
+        <input id="test_number" type="number" placeholder="Test Number">
+        <input id="time_limit" type="number" placeholder="Timer in Minutes">
+      </div>
+
+      <div class="grid">
+        <label><input id="shuffleQuestions" type="checkbox"> Shuffle Questions</label>
+        <label><input id="shuffleOptions" type="checkbox"> Shuffle Options</label>
+      </div>
+
+      <textarea id="questions" rows="12" placeholder='Questions JSON here'></textarea>
+
+      <button onclick="uploadTest()">Upload Test</button>
+      <p id="uploadStatus" class="muted"></p>
+    </section>
+
+    <section class="card">
+      <h2>Auto Generate Test</h2>
+      <div class="grid">
+        <select id="autoSeries">
+          <option value="365_days">365 Days Challenge</option>
+          <option value="norcet_100_days">NORCET 100 Days Challenge</option>
+          <option value="daily_morning">Daily Morning Test</option>
+          <option value="daily_evening">Daily Evening Test</option>
+        </select>
+        <input id="autoTotal" type="number" placeholder="Total Questions">
+      </div>
+      <input id="autoTimer" type="number" placeholder="Timer in Minutes">
+      <textarea id="weightage" rows="8" placeholder='Subject weightage JSON e.g. {"MSN":20,"CHN":15,"OBG":15}'></textarea>
+      <button onclick="autoGenerateTest()">Generate From Question Bank</button>
+      <p class="muted">Auto generation logic next step me connect karenge.</p>
+    </section>
+
+    <section class="card">
+      <h2>Question Bank Upload</h2>
+      <textarea id="bankQuestions" rows="10" placeholder='Bulk question bank JSON'></textarea>
+      <button onclick="uploadQuestionBank()">Upload Question Bank</button>
+    </section>
+
+    <section class="card">
+      <h2>Manage Tests</h2>
+      <button onclick="loadTests()">Load Tests</button>
+      <div id="testList"></div>
+    </section>
+  </main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBB6wEYXCeu-IhgdkbD4zEaBmSJ9xkCXC0",
+  authDomain: "nursingstudyvaultprep.firebaseapp.com",
+  databaseURL: "https://nursingstudyvaultprep-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nursingstudyvaultprep",
+  storageBucket: "nursingstudyvaultprep.firebasestorage.app",
+  messagingSenderId: "583546522601",
+  appId: "1:583546522601:web:1165a7805c400b05235978"
+};
+
+const ADMIN_EMAILS = ["pbhupeshk2022@gmail.com"];
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let currentUser = null;
+
+function isAdmin(){
+  return currentUser && ADMIN_EMAILS.includes(currentUser.email);
+}
+
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  document.getElementById("loginStatus").innerText = user ? "Logged in: " + user.email : "Not logged in";
+  document.getElementById("uidBox").innerText = user ? "UID: " + user.uid : "";
+});
+
+window.loginAdmin = async function(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  await signInWithEmailAndPassword(auth,email,password);
+};
+
+window.logoutAdmin = async function(){
+  await signOut(auth);
+};
+
+window.uploadTest = async function(){
+  if(!isAdmin()) return alert("Access denied");
+
+  const questions = JSON.parse(document.getElementById("questions").value);
+
+  const data = {
+    subject_id: document.getElementById("subject_id").value,
+    subject_name: document.getElementById("subject_name").value,
+    topic_name: document.getElementById("topic_name").value,
+    test_number: Number(document.getElementById("test_number").value),
+    time_limit: Number(document.getElementById("time_limit").value),
+    unlockDate: document.getElementById("unlockDate").value,
+    shuffleQuestions: document.getElementById("shuffleQuestions").checked,
+    shuffleOptions: document.getElementById("shuffleOptions").checked,
+    questions,
+    createdAt: serverTimestamp(),
+    createdBy: currentUser.email,
+    createdByUid: currentUser.uid
+  };
+
+  await addDoc(collection(db,"subject_tests"), data);
+  alert("Test uploaded successfully");
+};
+
+window.uploadQuestionBank = async function(){
+  if(!isAdmin()) return alert("Access denied");
+  const list = JSON.parse(document.getElementById("bankQuestions").value);
+  for(const q of list){
+    await addDoc(collection(db,"question_bank"), {
+      ...q,
+      createdAt: serverTimestamp(),
+      createdBy: currentUser.email
+    });
+  }
+  alert("Question bank uploaded");
+};
+
+window.autoGenerateTest = async function(){
+  try{
+    if(!isAdmin()) return alert("Access denied");
+
+    const series = document.getElementById("autoSeries").value;
+    const total = Number(document.getElementById("autoTotal").value);
+    const timer = Number(document.getElementById("autoTimer").value);
+    const weightage = JSON.parse(document.getElementById("weightage").value || "{}");
+
+    if(!total || !timer) return alert("Total questions and timer required");
+
+    const bankSnap = await getDocs(collection(db,"question_bank"));
+    const bank = bankSnap.docs.map(d => ({ id:d.id, ...d.data() }));
+
+    if(bank.length === 0) return alert("Question bank is empty");
+
+    let selected = [];
+
+    for(const [subject, count] of Object.entries(weightage)){
+      const pool = bank.filter(q =>
+        String(q.subject || "").toLowerCase() === String(subject).toLowerCase()
+      );
+
+      const shuffled = pool.sort(() => Math.random() - 0.5);
+      selected.push(...shuffled.slice(0, Number(count)));
+    }
+
+    if(selected.length < total){
+      const usedIds = new Set(selected.map(q => q.id));
+      const remaining = bank.filter(q => !usedIds.has(q.id)).sort(() => Math.random() - 0.5);
+      selected.push(...remaining.slice(0, total - selected.length));
+    }
+
+    selected = selected.slice(0,total).map(q => ({
+      question: q.question,
+      options: q.options,
+      correct: Number(q.correct),
+      explanation: q.explanation || "",
+      subject: q.subject || "",
+      topic: q.topic || "",
+      difficulty: q.difficulty || ""
+    }));
+
+    const nextNumber = Date.now();
+
+    await addDoc(collection(db,"subject_tests"), {
+      subject_id: series,
+      subject_name:
+        series === "365_days" ? "365 Days Challenge" :
+        series === "norcet_100_days" ? "NORCET 100 Days Challenge" :
+        series === "daily_morning" ? "Daily Morning Test" :
+        "Daily Evening Test",
+      topic_name: "Auto Generated Test",
+      test_number: nextNumber,
+      time_limit: timer,
+      unlockDate: new Date().toISOString().slice(0,10),
+      shuffleQuestions: true,
+      shuffleOptions: true,
+      questions: selected,
+      autoGenerated: true,
+      weightage,
+      createdAt: serverTimestamp(),
+      createdBy: currentUser.email,
+      createdByUid: currentUser.uid
+    });
+
+    alert("Auto generated test uploaded successfully: " + selected.length + " questions");
+  }catch(e){
+    alert("Auto generate error: " + e.message);
+  }
+};
+
+window.loadTests = async function(){
+  if(!isAdmin()) return alert("Access denied");
+  const snap = await getDocs(query(collection(db,"subject_tests"), orderBy("test_number","asc")));
+  const box = document.getElementById("testList");
+  box.innerHTML = "";
+  snap.forEach(d => {
+    const t = d.data();
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<b>${t.subject_name || t.subject_id}</b><br>Test ${t.test_number || "-"} | ${t.unlockDate || "-"}<br><button class="danger" onclick="deleteTest('${d.id}')">Delete</button>`;
+    box.appendChild(div);
+  });
+};
+
+window.deleteTest = async function(id){
+  if(!isAdmin()) return alert("Access denied");
+  if(!confirm("Delete this test?")) return;
+  await deleteDoc(doc(db,"subject_tests",id));
+  alert("Deleted");
+  loadTests();
+};
+</script>
+</body>
+</html>
