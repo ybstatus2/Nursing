@@ -279,16 +279,20 @@ export default function App() {
 
   const subjects = useMemo(() => {
     const map = {};
-    tests.forEach(t => {
-      if (!map[t.subject_id]) {
-        map[t.subject_id] = {
-          id: t.subject_id,
-          name: t.subject_name || t.subject_id,
-          count: 0
-        };
-      }
-      map[t.subject_id].count++;
-    });
+
+    tests
+      .filter(t => !t.series_id && t.subject_id)
+      .forEach(t => {
+        if (!map[t.subject_id]) {
+          map[t.subject_id] = {
+            id: t.subject_id,
+            name: t.subject_name || t.subject_id,
+            count: 0
+          };
+        }
+        map[t.subject_id].count++;
+      });
+
     return Object.values(map);
   }, [tests]);
 
@@ -1093,7 +1097,7 @@ export default function App() {
               {(profileForm.name || user?.email || "U").charAt(0).toUpperCase()}
             </div>
 
-            <h3>{profileForm.name || "Student Name"}</h3>
+            <h3>{profileForm.name || profile?.name || profile?.fullName || user?.displayName || user?.email?.split("@")[0] || "Student Name"}</h3>
             <p>{user?.email}</p>
 
             <div className="profileInfo">
