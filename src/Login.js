@@ -25,17 +25,21 @@ export default function Login() {
   const [resetSent, setResetSent] = useState(false);
   const navigate = useNavigate();
 
+  const saveFCMToken = async (uid) => {
+    const token = await requestFCMToken(uid);
+    if(token) {
+      await updateDoc(doc(db, "users", uid), { fcmToken: token });
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if(!email || !password) { setError('Please fill all fields'); return; }
     setLoading(true);
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      requestFCMToken(result.user.uid).then(token => {
-        if(token) updateDoc(doc(db, "users", result.user.uid), { fcmToken: token });
-      });
       const result = await signInWithEmailAndPassword(auth, email, password);
+      await saveFCMToken(result.user.uid);
       navigate("/lock");
     } catch(e) { 
       setError(e.message.includes('invalid') ? 'Invalid email or password' : e.message);
@@ -51,16 +55,10 @@ export default function Login() {
     setError('');
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      // Save user profile
       await setDoc(doc(db, 'users', result.user.uid), {
-        name,
-        email,
-        createdAt: new Date().toISOString()
+        name, email, createdAt: new Date().toISOString()
       });
-      requestFCMToken(result.user.uid).then(token => {
-        if(token) updateDoc(doc(db, "users", result.user.uid), { fcmToken: token });
-      });
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      await saveFCMToken(result.user.uid);
       navigate("/lock");
     } catch(e) { 
       setError(e.message.includes('email-already') ? 'Email already registered' : e.message);
@@ -74,7 +72,6 @@ export default function Login() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      // Save user if new
       const user = result.user;
       await setDoc(doc(db, 'users', user.uid), {
         name: user.displayName || 'User',
@@ -82,10 +79,7 @@ export default function Login() {
         photoURL: user.photoURL,
         createdAt: new Date().toISOString()
       }, { merge: true });
-      requestFCMToken(result.user.uid).then(token => {
-        if(token) updateDoc(doc(db, "users", result.user.uid), { fcmToken: token });
-      });
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      await saveFCMToken(user.uid);
       navigate("/lock");
     } catch(e) {
       if(e.code !== 'auth/popup-closed-by-user') {
@@ -107,7 +101,6 @@ export default function Login() {
   return (
     <div className="h-full flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 overflow-y-auto">
       <div className="w-full max-w-sm">
-        {/* Logo & Title */}
         <div className="text-center mb-6">
           <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
             <span className="text-3xl font-black">R</span>
@@ -120,14 +113,12 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Error Alert */}
         {error && (
           <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-3 mb-4 flex items-center gap-2 text-red-300 text-sm">
             <AlertCircle size={16} /> {error}
           </div>
         )}
 
-        {/* Reset Success */}
         {resetSent && (
           <div className="bg-green-500/20 border border-green-500/50 rounded-xl p-3 mb-4 text-green-300 text-sm">
             Password reset link sent to your email!
@@ -135,15 +126,9 @@ export default function Login() {
         )}
 
         {!resetMode ? (
-          /* Login / Register Form */
           <form onSubmit={isRegister ? handleRegister : handleLogin} className="space-y-3">
-            {/* Google Sign-In Button */}
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="w-full py-3 bg-white hover:bg-gray-100 rounded-xl font-medium text-gray-800 flex items-center justify-center gap-3 transition-all disabled:opacity-50"
-            >
+            <button type="button" onClick={handleGoogleSignIn} disabled={loading}
+              className="w-full py-3 bg-white hover:bg-gray-100 rounded-xl font-medium text-gray-800 flex items-center justify-center gap-3 transition-all disabled:opacity-50">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -153,70 +138,45 @@ export default function Login() {
               Continue with Google
             </button>
 
-            {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-gray-700"></div>
               <span className="text-gray-500 text-xs">or</span>
               <div className="flex-1 h-px bg-gray-700"></div>
             </div>
 
-            {/* Name Field - Register Only */}
             {isRegister && (
               <div className="relative">
                 <UserPlus className="absolute left-4 top-3.5 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                />
+                <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
               </div>
             )}
 
-            {/* Email Field */}
             <div className="relative">
               <Mail className="absolute left-4 top-3.5 text-gray-400" size={18} />
-              <input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+              <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
             </div>
 
-            {/* Password Field */}
             <div className="relative">
               <Lock className="absolute left-4 top-3.5 text-gray-400" size={18} />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+              <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={e => setPassword(e.target.value)}
+                className="w-full pl-12 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-gray-400">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl font-bold text-white flex items-center justify-center gap-2 hover:from-blue-500 hover:to-blue-400 transition-all disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading}
+              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl font-bold text-white flex items-center justify-center gap-2 hover:from-blue-500 hover:to-blue-400 transition-all disabled:opacity-50">
               {isRegister ? <UserPlus size={20} /> : <LogIn size={20} />}
               {loading ? 'Please wait...' : isRegister ? 'Create Account' : 'Login'}
             </button>
 
-            {/* Toggle Login/Register */}
             <button type="button" onClick={() => { setIsRegister(!isRegister); setError(''); }} className="w-full text-center text-blue-400 text-sm">
               {isRegister ? 'Already have an account? Login' : "Don't have an account? Create one"}
             </button>
 
-            {/* Forgot Password */}
             {!isRegister && (
               <button type="button" onClick={() => { setResetMode(true); setError(''); }} className="w-full text-center text-gray-400 text-sm">
                 Forgot Password?
@@ -224,18 +184,12 @@ export default function Login() {
             )}
           </form>
         ) : (
-          /* Reset Password Form */
           <div className="space-y-4">
             <p className="text-gray-300 text-sm text-center">Enter your email to receive reset link</p>
             <div className="relative">
               <Mail className="absolute left-4 top-3.5 text-gray-400" size={18} />
-              <input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-              />
+              <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
             </div>
             <button onClick={handleReset} className="w-full py-3 bg-blue-600 rounded-xl font-bold text-white">
               Send Reset Link
