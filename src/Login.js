@@ -35,6 +35,7 @@ export default function Login() {
       requestFCMToken(result.user.uid).then(token => {
         if(token) updateDoc(doc(db, "users", result.user.uid), { fcmToken: token });
       });
+      const result = await signInWithEmailAndPassword(auth, email, password);
       navigate("/lock");
     } catch(e) { 
       setError(e.message.includes('invalid') ? 'Invalid email or password' : e.message);
@@ -59,6 +60,7 @@ export default function Login() {
       requestFCMToken(result.user.uid).then(token => {
         if(token) updateDoc(doc(db, "users", result.user.uid), { fcmToken: token });
       });
+      const result = await signInWithEmailAndPassword(auth, email, password);
       navigate("/lock");
     } catch(e) { 
       setError(e.message.includes('email-already') ? 'Email already registered' : e.message);
@@ -83,6 +85,7 @@ export default function Login() {
       requestFCMToken(result.user.uid).then(token => {
         if(token) updateDoc(doc(db, "users", result.user.uid), { fcmToken: token });
       });
+      const result = await signInWithEmailAndPassword(auth, email, password);
       navigate("/lock");
     } catch(e) {
       if(e.code !== 'auth/popup-closed-by-user') {
