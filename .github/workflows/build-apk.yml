@@ -11,7 +11,6 @@ jobs:
       - run: npm install
       - run: CI=false npm run build
       - run: npm install @capacitor/core @capacitor/cli @capacitor/android
-      - run: npx cap init RPREP com.rprep.app --web-dir=build
       - run: npx cap add android
       - uses: actions/setup-java@v4
         with:
