@@ -492,12 +492,8 @@ export default function App() {
 
   if (showSplash) {
     return (
-      <div className="splashScreen">
-        <div className="splashLogoBox">
-          <span className="splashIcon">🩺</span>
-          <h1>RPrep</h1>
-          <p>Your Nursing Success Partner</p>
-        </div>
+      <div className="appSplash">
+        <img src="/assets/splash.png" alt="RPrep" className="appSplashImg" />
       </div>
     );
   }
@@ -508,14 +504,13 @@ export default function App() {
     return (
       <div className="authPage">
         <div className="authCard">
-          <div className="loginLogo">
-            <span className="loginLogoIcon">🩺</span>
-            <div>
-              <h1>RPrep</h1>
-              <p>Your Nursing Success Partner</p>
+            <div className="loginLogoClean">
+              <img src="/assets/logo.png" alt="RPrep" className="loginLogoBigOnly" />
             </div>
+          <div className="loginTagline">
+            <span>Professional Nursing Exam Preparation</span>
+            <small>Practice Tests • Test Series • Smart Preparation</small>
           </div>
-          <p>Professional Nursing Exam Preparation</p>
 
           <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email address" />
           <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" type="password" />
@@ -551,7 +546,7 @@ export default function App() {
       {screen !== "exam" && (
         <header className="topbar">
           <div className="headerBrand">
-            <span className="headerLogoIcon">🩺</span>
+            <img src="/assets/logo.png" alt="RPrep" className="headerLogoImg" />
             <div>
               <h2>RPrep</h2>
               <small>Your Nursing Success Partner</small>
