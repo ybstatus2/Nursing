@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { shareResult } from "./ShareResult";
 import { 
   CheckCircle, XCircle, Home, RotateCcw, Share2, 
   Trophy, Target, Clock, BarChart3, Download,

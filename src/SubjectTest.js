@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSound } from "./useSound";
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { db, auth } from "./firebase";
 import { collection, getDocs, query, where, addDoc, deleteDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
@@ -111,7 +112,13 @@ export default function SubjectTest() {
     return `${h>0?h+':':''}${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
   };
 
+  const { playCorrect, playWrong } = useSound();
   const handleAnswer = (optIndex) => {
+    const q = questions[currentQ];
+    if(q?.correct !== undefined) {
+      if(optIndex === q.correct) playCorrect();
+      else playWrong();
+    }
     setAnswers({...answers, [currentQ]: optIndex});
   };
 
