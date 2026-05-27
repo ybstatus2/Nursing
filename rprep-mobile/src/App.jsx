@@ -493,7 +493,7 @@ export default function App() {
   if (showSplash) {
     return (
       <div className="appSplash">
-        <img src="/assets/splash.png" alt="RPrep" className="appSplashImg" />
+        <img src="assets/splash.png" alt="RPrep" className="appSplashImg" />
       </div>
     );
   }
@@ -505,7 +505,7 @@ export default function App() {
       <div className="authPage">
         <div className="authCard">
             <div className="loginLogoClean">
-              <img src="/assets/logo.png" alt="RPrep" className="loginLogoBigOnly" />
+              <img src="assets/logo.png" alt="RPrep" className="loginLogoBigOnly" />
             </div>
           <div className="loginTagline">
             <span>Professional Nursing Exam Preparation</span>
@@ -546,7 +546,7 @@ export default function App() {
       {screen !== "exam" && (
         <header className="topbar">
           <div className="headerBrand">
-            <img src="/assets/logo.png" alt="RPrep" className="headerLogoImg" />
+            <img src="assets/logo.png" alt="RPrep" className="headerLogoImg" />
             <div>
               <h2>RPrep</h2>
               <small>Your Nursing Success Partner</small>
