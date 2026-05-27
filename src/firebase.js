@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBB6wEYXCeu-IhgdkbD4zEaBmSJ9xkCXC0",
@@ -14,3 +15,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const messaging = getMessaging(app);
+export { app };
+
+export async function requestFCMToken(userId) {
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const token = await getToken(messaging, {
+        vapidKey: "clTBG2m0CxjIUFvMlcfmVTVmZSJKSRCl-kZJaJkb1Gk"
+      });
+      return token;
+    }
+  } catch(e) {
+    console.log('FCM error:', e.message);
+  }
+  return null;
+}
+
+export function onMessageListener(callback) {
+  return onMessage(messaging, (payload) => {
+    callback(payload);
+  });
+}

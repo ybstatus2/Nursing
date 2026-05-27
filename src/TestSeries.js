@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from './firebase';
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { 
   Sun, Moon, Zap, Calendar, Play, Clock, 
-  ChevronRight, Flame, Trophy, ArrowRight
+  Flame, Trophy
 } from 'lucide-react';
 
 const seriesList = [
@@ -63,56 +63,67 @@ const seriesList = [
 export default function TestSeries() {
   const navigate = useNavigate();
   const [latestTests, setLatestTests] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadLatestTests();
-  }, []);
+  useEffect(() => { loadLatestTests(); }, []);
 
   const loadLatestTests = async () => {
     try {
       const testsData = {};
       for (const series of seriesList) {
+        console.log(`Fetching series: ${series.id}`);
         const q = query(
           collection(db, "subject_tests"),
           where("series_id", "==", series.id),
-          orderBy("test_number", "desc"),
+          
           limit(1)
         );
         const snap = await getDocs(q);
+        console.log(`${series.id}: ${snap.docs.length} docs found`);
+        
         if (!snap.empty) {
           const doc = snap.docs[0];
+          const data = doc.data();
+          console.log(`${series.id} data:`, data);
           testsData[series.id] = {
             id: doc.id,
-            testNumber: doc.data().test_number,
-            totalQuestions: doc.data().total_questions
+            testNumber: data.test_number,
+            totalQuestions: data.total_questions || data.questions?.length || 0
           };
         }
       }
       setLatestTests(testsData);
     } catch(e) {
-      console.log("Firebase fetch error:", e.message);
+      console.error("Firebase error:", e.message);
+      setError(e.message);
     }
-    setLoading(false);
   };
 
   const handleStartTest = (seriesId) => {
+    navigate(`/test-series-tests/${seriesId}`);
+  };
+
+  const handleStartTestOld = (seriesId) => {
     if (latestTests[seriesId]) {
       navigate(`/test/${seriesId}`);
     } else {
-      alert("No test available yet for this series. Please try another.");
+      alert("No test available yet. Upload test from admin panel.");
     }
   };
 
   return (
     <div className="h-full overflow-y-auto bg-gray-900 pb-20">
-      {/* Header */}
       <div className="bg-gradient-to-br from-blue-900 to-gray-900 p-5 pt-6">
         <h2 className="text-xl font-bold mb-1">Test Series</h2>
         <p className="text-gray-400 text-sm">Choose your test and start practicing</p>
       </div>
 
-      {/* Series Cards */}
+      {error && (
+        <div className="mx-4 mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm">
+          Error: {error}
+        </div>
+      )}
+
       <div className="px-4 mt-4 space-y-4">
         {seriesList.map((series, i) => (
           <div
@@ -121,12 +132,9 @@ export default function TestSeries() {
             onClick={() => handleStartTest(series.id)}
           >
             <div className="flex items-start gap-4">
-              {/* Icon */}
               <div className={`w-14 h-14 bg-gradient-to-br ${series.color} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
                 {series.icon}
               </div>
-
-              {/* Content */}
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-bold text-base">{series.name}</h3>
@@ -137,22 +145,12 @@ export default function TestSeries() {
                   )}
                 </div>
                 <p className="text-xs text-gray-400 mb-3">{series.desc}</p>
-
-                {/* Meta Info */}
                 <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
-                  <span className="flex items-center gap-1">
-                    <Clock size={12} /> {series.duration}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Zap size={12} /> {series.questions} Qs
-                  </span>
-                  <span className="flex items-center gap-1">
-                    ⏰ {series.time}
-                  </span>
+                  <span className="flex items-center gap-1"><Clock size={12} /> {series.duration}</span>
+                  <span className="flex items-center gap-1"><Zap size={12} /> {series.questions} Qs</span>
+                  <span className="flex items-center gap-1">⏰ {series.time}</span>
                 </div>
-
-                {/* Latest Test Info */}
-                {latestTests[series.id] && (
+                {latestTests[series.id] ? (
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
                       Test #{latestTests[series.id].testNumber}
@@ -161,10 +159,10 @@ export default function TestSeries() {
                       {latestTests[series.id].totalQuestions} MCQs
                     </span>
                   </div>
+                ) : (
+                  <p className="text-[10px] text-gray-500">No tests uploaded yet</p>
                 )}
               </div>
-
-              {/* Arrow */}
               <div className="flex-shrink-0 self-center">
                 <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
                   <Play size={16} className="text-white ml-0.5" />
@@ -175,12 +173,11 @@ export default function TestSeries() {
         ))}
       </div>
 
-      {/* Features Section */}
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-6 mb-24">
         <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
           <Flame size={16} className="text-orange-400" /> Why Test Series?
         </h3>
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3">
           {[
             { icon: "🎯", title: "Daily Practice", desc: "Stay consistent" },
             { icon: "📊", title: "Track Progress", desc: "See improvement" },

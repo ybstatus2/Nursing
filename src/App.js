@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './ThemeContext';
 import { auth } from './firebase';
 import Layout from './Layout';
@@ -11,6 +11,7 @@ import QuickTest from './QuickTest';
 import SubjectTests from './SubjectTests';
 import SubjectTest from './SubjectTest';
 import TestSeries from './TestSeries';
+import TestSeriesTests from './TestSeriesTests';
 import Result from './Result';
 import Profile from './Profile';
 import Doubt from './Doubt';
@@ -25,6 +26,7 @@ import StudyMaterials from './StudyMaterials';
 function AuthGuard({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     return auth.onAuthStateChanged((u) => {
@@ -39,15 +41,9 @@ function AuthGuard({ children }) {
     </div>
   );
 
-  if (!user) return <Login />;
-
-  // Check for PIN
-  const hasPin = localStorage.getItem('rprep_pin');
-  if (hasPin) {
-    const location = useLocation();
-    if (location.pathname === '/' || location.pathname === '') {
-      return <AppLock />;
-    }
+  if (!user) {
+    if (location.pathname !== '/') return <Navigate to="/" />;
+    return <Login />;
   }
 
   return children;
@@ -68,6 +64,7 @@ export default function App() {
               <Route path="/quick-test" element={<QuickTest />} />
               <Route path="/test/:subjectId" element={<SubjectTest />} />
               <Route path="/test-series" element={<TestSeries />} />
+              <Route path="/test-series-tests/:seriesId" element={<TestSeriesTests />} />
               <Route path="/result" element={<Result />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/doubt" element={<Doubt />} />
