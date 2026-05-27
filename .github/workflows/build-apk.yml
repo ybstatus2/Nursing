@@ -1,0 +1,57 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ React-app ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Build React App
+        run: npm run build
+      
+      - name: Setup Capacitor
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init RPREP com.rprep.app --web-dir=build
+          npx cap add android
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Setup Android SDK
+        run: |
+          mkdir -p android-sdk
+          cd android-sdk
+          curl -s https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
+          unzip -q cmdline-tools.zip
+          yes | ./cmdline-tools/bin/sdkmanager --licenses
+          ./cmdline-tools/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
+      
+      - name: Build APK
+        run: |
+          export ANDROID_HOME=$(pwd)/android-sdk
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RPREP-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
