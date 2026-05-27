@@ -9,7 +9,7 @@ jobs:
         with:
           node-version: 18
       - run: npm install
-      - run: npm run build
+      - run: CI=false npm run build
       - run: npm install @capacitor/core @capacitor/cli @capacitor/android
       - run: npx cap init RPREP com.rprep.app --web-dir=build
       - run: npx cap add android
