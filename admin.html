@@ -3,1393 +3,415 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RPrep - Professional Admin Panel</title>
+  <title>RPrep Admin Panel</title>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-    
-    .container {
-      max-width: 1400px;
-      margin: auto;
-    }
-    
-    .header {
-      background: white;
-      border-radius: 20px;
-      padding: 25px 30px;
-      margin-bottom: 25px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    
-    .header h1 {
-      color: #2d3748;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .header h1::before {
-      content: "⚕️";
-      font-size: 32px;
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    
-    .badge {
-      padding: 8px 16px;
-      border-radius: 25px;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    
-    .badge-success {
-      background: #c6f6d5;
-      color: #22543d;
-    }
-    
-    .badge-danger {
-      background: #fed7d7;
-      color: #9b2c2c;
-    }
-    
-    .badge-info {
-      background: #bee3f8;
-      color: #2a4365;
-    }
-    
-    .nav-tabs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 25px;
-    }
-    
-    .nav-tab {
-      padding: 12px 24px;
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: 2px solid transparent;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s;
-      backdrop-filter: blur(10px);
-    }
-    
-    .nav-tab:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateY(-2px);
-    }
-    
-    .nav-tab.active {
-      background: white;
-      color: #667eea;
-      border-color: white;
-    }
-    
-    .tab-content {
-      display: none;
-      animation: fadeIn 0.5s;
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 25px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      transition: all 0.3s;
-    }
-    
-    .card:hover {
-      box-shadow: 0 15px 50px rgba(0,0,0,0.15);
-      transform: translateY(-2px);
-    }
-    
-    .card h2 {
-      color: #2d3748;
-      margin-bottom: 20px;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .card h2::before {
-      font-size: 24px;
-    }
-    
-    .card h2.icon-series::before { content: "📚"; }
-    .card h2.icon-upload::before { content: "⬆️"; }
-    .card h2.icon-auto::before { content: "🤖"; }
-    .card h2.icon-bank::before { content: "🏦"; }
-    .card h2.icon-manage::before { content: "📋"; }
-    .card h2.icon-doubts::before { content: "💬"; }
-    .card h2.icon-login::before { content: "🔐"; }
-    
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 15px;
-    }
-    
-    .grid-3 {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-    
-    .form-group {
-      margin-bottom: 5px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #4a5568;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    
-    input, select, textarea {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      font-size: 14px;
-      transition: all 0.3s;
-      background: #f7fafc;
-      color: #2d3748;
-    }
-    
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #667eea;
-      background: white;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    textarea {
-      font-family: 'Courier New', monospace;
-      resize: vertical;
-    }
-    
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin: 5px;
-    }
-    
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    }
-    
-    .btn:active {
-      transform: translateY(0);
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .btn-success {
-      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-      color: white;
-    }
-    
-    .btn-danger {
-      background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-      color: white;
-    }
-    
-    .btn-warning {
-      background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-      color: white;
-    }
-    
-    .btn-info {
-      background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-      color: white;
-    }
-    
-    .btn-sm {
-      padding: 8px 16px;
-      font-size: 12px;
-    }
-    
-    .status-message {
-      padding: 12px;
-      border-radius: 12px;
-      margin-top: 10px;
-      font-weight: 500;
-    }
-    
-    .status-success {
-      background: #c6f6d5;
-      color: #22543d;
-    }
-    
-    .status-error {
-      background: #fed7d7;
-      color: #9b2c2c;
-    }
-    
-    .status-info {
-      background: #bee3f8;
-      color: #2a4365;
-    }
-    
-    .test-item, .series-item, .doubt-item {
-      background: #f7fafc;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-left: 4px solid #667eea;
-    }
-    
-    .test-item:hover, .series-item:hover, .doubt-item:hover {
-      background: #edf2f7;
-    }
-    
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-    
-    .stat-card {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    
-    .stat-number {
-      font-size: 32px;
-      font-weight: 700;
-      color: #667eea;
-    }
-    
-    .stat-label {
-      color: #718096;
-      margin-top: 5px;
-    }
-    
-    .flex-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    
-    @media (max-width: 768px) {
-      .header {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .nav-tabs {
-        justify-content: center;
-      }
-      
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: #718096;
-    }
-    
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui;background:#f4f7fb;color:#111827}
+    header{background:#111827;color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    header h1{font-size:20px;margin:0}
+    .wrap{max-width:1150px;margin:auto;padding:18px}
+    .card{background:white;border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:0 8px 30px rgba(0,0,0,.06)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    label{font-weight:700;font-size:13px;margin-bottom:5px;display:block}
+    input,select,textarea{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;font-size:14px}
+    textarea{min-height:180px;font-family:monospace}
+    button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;margin:5px 5px 5px 0}
+    .primary{background:#2563eb;color:white}
+    .green{background:#059669;color:white}
+    .purple{background:#7c3aed;color:white}
+    .red{background:#dc2626;color:white}
+    .gray{background:#e5e7eb;color:#111827}
+    .msg{white-space:pre-line;background:#f3f4f6;padding:10px;border-radius:10px;margin-top:10px;font-size:13px}
+    .tabs button{background:#e5e7eb}
+    .tabs button.active{background:#111827;color:white}
+    .hidden{display:none}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
+    th{background:#f9fafb}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1>RPrep Admin Panel</h1>
-      <div class="user-info">
-        <span id="loginStatus" class="badge badge-danger">Not logged in</span>
-        <span id="uidBox" class="badge badge-info" style="display:none;"></span>
-      </div>
-    </div>
 
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-      <div class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
-      <div class="nav-tab" onclick="switchTab('series')">📚 Series</div>
-      <div class="nav-tab" onclick="switchTab('upload')">⬆️ Upload Test</div>
-      <div class="nav-tab" onclick="switchTab('auto')">🤖 Auto Generate</div>
-      <div class="nav-tab" onclick="switchTab('bank')">🏦 Question Bank</div>
-      <div class="nav-tab" onclick="switchTab('manage')">📋 Manage Tests</div>
-      <div class="nav-tab" onclick="switchTab('doubts')">💬 Doubts</div>
-      <div class="nav-tab" onclick="switchTab('settings')">🔐 Login</div>
-    </div>
-
-    <!-- Dashboard Tab -->
-    <div id="dashboard" class="tab-content active">
-      <div class="stats" id="dashboardStats">
-        <div class="stat-card">
-          <div class="stat-number" id="totalSeries">0</div>
-          <div class="stat-label">Total Series</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="totalTests">0</div>
-          <div class="stat-label">Total Tests</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="totalQuestions">0</div>
-          <div class="stat-label">Question Bank</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="totalDoubts">0</div>
-          <div class="stat-label">Pending Doubts</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Series Tab -->
-    <div id="series" class="tab-content">
-      <div class="card">
-        <h2 class="icon-series">Create New Series</h2>
-        <div class="grid">
-          <div class="form-group">
-            <label>Series ID *</label>
-            <input id="newSeriesId" placeholder="e.g., aiims_50_days">
-            <small style="color:#718096;">Unique ID, no spaces, lowercase</small>
-          </div>
-          <div class="form-group">
-            <label>Series Name *</label>
-            <input id="newSeriesName" placeholder="e.g., AIIMS 50 Days Challenge">
-          </div>
-        </div>
-        <div class="grid">
-          <div class="form-group">
-            <label>Mode *</label>
-            <select id="newSeriesMode">
-              <option value="allUnlocked">All Tests Unlocked</option>
-              <option value="todayOnly">Today's Test Only</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Status *</label>
-            <select id="newSeriesStatus">
-              <option value="active">Active</option>
-              <option value="coming_soon">Coming Soon</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid">
-          <div class="form-group">
-            <label>Total Days</label>
-            <input id="newSeriesDays" type="number" placeholder="e.g., 50">
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <input id="newSeriesDesc" placeholder="Brief description for students">
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="createNewSeries()">➕ Create Series</button>
-        <div id="seriesStatus"></div>
-      </div>
-
-      <div class="card">
-        <h2 class="icon-series">Existing Series</h2>
-        <button class="btn btn-info" onclick="loadSeries()">🔄 Refresh Series List</button>
-        <div id="seriesList"></div>
-      </div>
-    </div>
-
-    <!-- Upload Test Tab -->
-    <div id="upload" class="tab-content">
-      <div class="card">
-        <h2 class="icon-upload">Upload Test</h2>
-        <div class="grid">
-          <div class="form-group">
-            <label>Test Type</label>
-            <select id="subject_id" onchange="toggleSubjectDropdown()">
-              <option value="daily_morning">Daily Morning Test</option>
-              <option value="daily_evening">Daily Evening Test</option>
-              <option value="subject_test">Subject Test</option>
-              <!-- Dynamic series will be added here -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Subject (for Subject Test)</label>
-            <select id="subjectDropdown" style="display:none;" onchange="applySubjectDropdown()">
-              <option value="">Select Subject</option>
-              <option value="anatomy">Anatomy</option>
-              <option value="physiology">Physiology</option>
-              <option value="fundamentals">Fundamentals of Nursing</option>
-              <option value="nutrition">Nutrition</option>
-              <option value="biochemistry">Biochemistry</option>
-              <option value="microbiology">Microbiology</option>
-              <option value="psychology">Psychology</option>
-              <option value="sociology">Sociology</option>
-              <option value="pharmacology">Pharmacology</option>
-              <option value="pathology">Pathology</option>
-              <option value="genetics">Genetics</option>
-              <option value="msn">Medical Surgical Nursing</option>
-              <option value="chn">Community Health Nursing</option>
-              <option value="obg">Obstetrics and Gynecology Nursing</option>
-              <option value="pediatric">Child Health Nursing</option>
-              <option value="psychiatric">Mental Health Nursing</option>
-              <option value="research">Nursing Research</option>
-              <option value="management">Nursing Management</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid">
-          <div class="form-group">
-            <label>Test Series</label>
-            <select id="testSeries">
-              <option value="">Select Series</option>
-              <option value="daily_morning">Daily Morning Test</option>
-              <option value="daily_evening">Daily Evening Test</option>
-              <!-- Dynamic series will be added here -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Unlock Date</label>
-            <input id="unlockDate" type="date">
-          </div>
-        </div>
-        <div class="grid">
-          <div class="form-group">
-            <label>Subject Name</label>
-            <input id="subject_name" placeholder="Subject Name">
-          </div>
-          <div class="form-group">
-            <label>Topic Name</label>
-            <input id="topic_name" placeholder="Topic Name">
-          </div>
-        </div>
-        <div class="grid grid-3">
-          <div class="form-group">
-            <label>Test Number</label>
-            <input id="test_number" type="number" placeholder="Test Number">
-          </div>
-          <div class="form-group">
-            <label>Timer (minutes)</label>
-            <input id="time_limit" type="number" placeholder="Timer in Minutes">
-          </div>
-          <div class="form-group">
-            <label>Difficulty</label>
-            <select id="difficulty">
-              <option value="Easy">Easy</option>
-              <option value="Medium" selected>Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid">
-          <div class="form-group">
-            <label class="flex-between">
-              <span><input id="shuffleQuestions" type="checkbox"> Shuffle Questions</span>
-              <span><input id="shuffleOptions" type="checkbox" checked> Shuffle Options</span>
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Questions (JSON Format)</label>
-          <textarea id="questions" rows="12" placeholder='Paste questions JSON here...'></textarea>
-        </div>
-        <div>
-          <button class="btn btn-info" onclick="showJsonFormat()">📄 Show Format</button>
-          <button class="btn btn-success" onclick="validateQuestionsJson()">✅ Validate JSON</button>
-          <button class="btn btn-warning" onclick="shufflePreview()">🔀 Shuffle Preview</button>
-          <button class="btn btn-primary" onclick="uploadTest()">⬆️ Upload Test</button>
-        </div>
-        <div id="uploadStatus"></div>
-        <div id="jsonReport" class="status-info" style="margin-top:10px;"></div>
-      </div>
-    </div>
-
-    <!-- Auto Generate Tab -->
-    <div id="auto" class="tab-content">
-      <div class="card">
-        <h2 class="icon-auto">Auto Generate Test</h2>
-        <div class="grid">
-          <div class="form-group">
-            <label>Series</label>
-            <select id="autoSeries">
-              <option value="daily_morning">Daily Morning Test</option>
-              <option value="daily_evening">Daily Evening Test</option>
-              <!-- Dynamic series will be added here -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Total Questions</label>
-            <input id="autoTotal" type="number" placeholder="e.g., 100">
-          </div>
-          <div class="form-group">
-            <label>Timer (minutes)</label>
-            <input id="autoTimer" type="number" placeholder="e.g., 90">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Subject Weightage (JSON)</label>
-          <textarea id="weightage" rows="6" placeholder='{"MSN":20, "CHN":15, "OBG":15, "Pediatric":15, "Psychiatric":15, "Fundamentals":20}'></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="autoGenerateTest()">🤖 Generate & Upload Test</button>
-        <p style="color:#718096; margin-top:10px;">Auto generation randomly picks questions from question bank based on weightage.</p>
-      </div>
-    </div>
-
-    <!-- Question Bank Tab -->
-    <div id="bank" class="tab-content">
-      <div class="card">
-        <h2 class="icon-bank">Upload Question Bank</h2>
-        <div class="form-group">
-          <label>Questions JSON Array</label>
-          <textarea id="bankQuestions" rows="12" placeholder='[{"question":"...","options":["A","B","C","D"],"correct":0,"subject":"MSN","topic":"Cardiology","difficulty":"Medium"}]'></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="uploadQuestionBank()">🏦 Upload to Bank</button>
-        <div id="bankStatus"></div>
-      </div>
-    </div>
-
-    <!-- Manage Tests Tab -->
-    <div id="manage" class="tab-content">
-      <div class="card">
-        <h2 class="icon-manage">Manage Tests</h2>
-        <div class="flex-between">
-          <div>
-            <button class="btn btn-info" onclick="loadTests()">🔄 Load All Tests</button>
-          </div>
-          <div class="form-group" style="min-width:200px;">
-            <select id="filterSeries" onchange="loadTests()">
-              <option value="">All Series</option>
-              <option value="daily_morning">Daily Morning</option>
-              <option value="daily_evening">Daily Evening</option>
-            </select>
-          </div>
-        </div>
-        <div id="testList"></div>
-      </div>
-    </div>
-
-    <!-- Doubts Tab -->
-    <div id="doubts" class="tab-content">
-      <div class="card">
-        <h2 class="icon-doubts">Doubt Reply Section</h2>
-        <button class="btn btn-info" onclick="loadDoubts()">🔄 Load All Doubts</button>
-        <div id="doubtList"></div>
-      </div>
-    </div>
-
-    <!-- Login Tab -->
-    <div id="settings" class="tab-content">
-      <div class="card">
-        <h2 class="icon-login">Admin Authentication</h2>
-        <div class="grid">
-          <div class="form-group">
-            <label>Admin Email</label>
-            <input id="email" type="email" value="pbhupeshk2022@gmail.com" placeholder="Admin Email">
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input id="password" type="password" placeholder="Enter Password">
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="loginAdmin()">🔐 Login</button>
-        <button class="btn btn-danger" onclick="logoutAdmin()">🚪 Logout</button>
-        <div id="loginMessage"></div>
-      </div>
-    </div>
+<header>
+  <h1>RPrep Admin Panel</h1>
+  <div>
+    <span id="userInfo">Not logged in</span>
+    <button class="gray" onclick="logout()">Logout</button>
   </div>
+</header>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, where, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+<div class="wrap">
 
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBB6wEYXCeu-IhgdkbD4zEaBmSJ9xkCXC0",
-      authDomain: "nursingstudyvaultprep.firebaseapp.com",
-      databaseURL: "https://nursingstudyvaultprep-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "nursingstudyvaultprep",
-      storageBucket: "nursingstudyvaultprep.firebasestorage.app",
-      messagingSenderId: "583546522601",
-      appId: "1:583546522601:web:1165a7805c400b05235978"
-    };
+  <section class="card" id="loginCard">
+    <h2>Admin Login</h2>
+    <div class="grid">
+      <div><label>Email</label><input id="email" type="email"></div>
+      <div><label>Password</label><input id="password" type="password"></div>
+    </div>
+    <button class="primary" onclick="login()">Login</button>
+    <div id="loginMsg" class="msg"></div>
+  </section>
 
-    // Admin Access Control
-    const ADMIN_EMAILS = ["pbhupeshk2022@gmail.com"];
-    const ADMIN_UIDS = ["ctuUrn7LyQdEqj3FjOGGw4qkuke2"];
+  <main id="adminArea" class="hidden">
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    let currentUser = null;
+    <section class="card">
+      <div class="tabs">
+        <button class="active" onclick="showTab('subject',this)">Subject Test Upload</button>
+        <button onclick="showTab('series',this)">Test Series Upload</button>
+        <button onclick="showTab('auto',this)">Auto Generate</button>
+        <button onclick="showTab('latest',this)">Latest Tests</button>
+      </div>
+    </section>
 
-    // Auth State Observer
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      const statusEl = document.getElementById("loginStatus");
-      const uidEl = document.getElementById("uidBox");
-      
-      if (user) {
-        statusEl.textContent = "✅ Logged in: " + user.email;
-        statusEl.className = "badge badge-success";
-        uidEl.textContent = "UID: " + user.uid;
-        uidEl.style.display = "inline-block";
-        
-        if (isAdmin()) {
-          await updateAllDropdowns();
-          loadDashboardStats();
-        }
-      } else {
-        statusEl.textContent = "❌ Not logged in";
-        statusEl.className = "badge badge-danger";
-        uidEl.style.display = "none";
-      }
+    <section class="card tab" id="tab-subject">
+      <h2>Subject Test Upload</h2>
+      <div class="grid">
+        <div><label>Subject</label><select id="subjectId"></select></div>
+        <div><label>Topic Name</label><input id="subjectTopic" placeholder="e.g. Protein"></div>
+        <div><label>Test Number</label><input id="subjectTestNumber" type="number" value="1"></div>
+        <div><label>Time Limit</label><input id="subjectTimeLimit" type="number" value="30"></div>
+      </div>
+      <label>Questions JSON</label>
+      <textarea id="subjectQuestions"></textarea>
+      <button class="gray" onclick="sampleJson('subjectQuestions')">Sample</button>
+      <button class="purple" onclick="shuffleBox('subjectQuestions','subjectMsg')">Shuffle Answers</button>
+      <button class="primary" onclick="validateBox('subjectQuestions','subjectMsg')">Validate</button>
+      <button class="green" onclick="uploadSubjectTest()">Upload Subject Test</button>
+      <div id="subjectMsg" class="msg"></div>
+    </section>
+
+    <section class="card tab hidden" id="tab-series">
+      <h2>Test Series Upload</h2>
+      <div class="grid">
+        <div><label>Series</label><select id="seriesId"></select></div>
+        <div><label>Test Number / Day</label><input id="seriesTestNumber" type="number" value="1"></div>
+        <div><label>Topic Name</label><input id="seriesTopic" placeholder="Auto: Series - Day 1"></div>
+        <div><label>Unlock Date</label><input id="seriesUnlockDate" type="date"></div>
+        <div><label>Time Limit</label><input id="seriesTimeLimit" type="number" value="30"></div>
+      </div>
+      <label>Questions JSON</label>
+      <textarea id="seriesQuestions"></textarea>
+      <button class="gray" onclick="sampleJson('seriesQuestions')">Sample</button>
+      <button class="purple" onclick="shuffleBox('seriesQuestions','seriesMsg')">Shuffle Answers</button>
+      <button class="primary" onclick="validateBox('seriesQuestions','seriesMsg')">Validate</button>
+      <button class="green" onclick="uploadSeriesTest()">Upload Series Test</button>
+      <div id="seriesMsg" class="msg"></div>
+    </section>
+
+    <section class="card tab hidden" id="tab-auto">
+      <h2>Auto Generate From Subject Tests</h2>
+      <div class="grid">
+        <div><label>Series</label><select id="autoSeriesId"></select></div>
+        <div><label>Test Number / Day</label><input id="autoTestNumber" type="number" value="1"></div>
+        <div><label>Total Questions</label><input id="autoTotal" type="number" value="100"></div>
+        <div><label>Time Limit</label><input id="autoTimeLimit" type="number" value="100"></div>
+        <div><label>Unlock Date</label><input id="autoUnlockDate" type="date"></div>
+      </div>
+      <label>Weightage JSON</label>
+      <textarea id="autoWeightage"></textarea>
+      <button class="gray" onclick="fill365()">365 Weightage</button>
+      <button class="gray" onclick="fillNorcet()">NORCET Weightage</button>
+      <button class="green" onclick="autoGenerate()">Generate Test</button>
+      <div id="autoMsg" class="msg"></div>
+    </section>
+
+    <section class="card tab hidden" id="tab-latest">
+      <h2>Latest Tests</h2>
+      <button class="primary" onclick="loadLatest()">Load Latest Tests</button>
+      <div id="latestBox"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyBB6wEYXCeu-IhgdkbD4zEaBmSJ9xkCXC0",
+  authDomain: "nursingstudyvaultprep.firebaseapp.com",
+  projectId: "nursingstudyvaultprep",
+  storageBucket: "nursingstudyvaultprep.firebasestorage.app",
+  messagingSenderId: "583546522601",
+  appId: "1:583546522601:web:1165a7805c400b05235978"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const ADMIN_EMAILS = ["pbhupeshk2022@gmail.com","pbhupeshk2021@gmail.com"];
+
+const SUBJECTS = [
+  ["medical-surgical-nursing","💊 Medical Surgical Nursing"],
+  ["obstetrics-and-gynaecology","🤰 Obstetrics & Gynaecology"],
+  ["pediatric-nursing","👶 Pediatric Nursing"],
+  ["mental-health-nursing","🧠 Mental Health Nursing"],
+  ["community-health-nursing","🌍 Community Health Nursing"],
+  ["nursing-management","🏥 Nursing Management"],
+  ["anatomy-and-physiology","🔬 Anatomy & Physiology"],
+  ["pharmacology","💉 Pharmacology"],
+  ["microbiology","🧫 Microbiology"],
+  ["research-and-statistics","📊 Research & Statistics"],
+  ["nursing-foundation","📘 Nursing Foundation"],
+  ["nutrition","🍎 Nutrition"],
+  ["biochemistry","🧬 Biochemistry"],
+  ["pathology","🩸 Pathology"],
+  ["infection-control","🦠 Infection Control"],
+  ["first-aid-and-emergency","⚕️ First Aid & Emergency"]
+];
+
+const SERIES = {
+  daily_morning: "Daily Morning Test",
+  daily_evening: "Daily Evening Test",
+  "365_days": "365 Days Challenge",
+  "norcet_100_days": "NORCET 100 Days Challenge"
+};
+
+function init(){
+  subjectId.innerHTML = SUBJECTS.map(s=>`<option value="${s[0]}">${s[1]}</option>`).join("");
+  seriesId.innerHTML = Object.entries(SERIES).map(s=>`<option value="${s[0]}">${s[1]}</option>`).join("");
+  autoSeriesId.innerHTML = Object.entries(SERIES).filter(s=>["365_days","norcet_100_days"].includes(s[0])).map(s=>`<option value="${s[0]}">${s[1]}</option>`).join("");
+}
+init();
+
+auth.onAuthStateChanged(user=>{
+  if(user && ADMIN_EMAILS.includes(user.email)){
+    loginCard.classList.add("hidden");
+    adminArea.classList.remove("hidden");
+    userInfo.innerText = user.email;
+  }else{
+    loginCard.classList.remove("hidden");
+    adminArea.classList.add("hidden");
+    userInfo.innerText = "Not logged in";
+  }
+});
+
+async function login(){
+  try{
+    loginMsg.innerText = "Logging in...";
+    await auth.signInWithEmailAndPassword(email.value.trim(), password.value);
+    loginMsg.innerText = "Login success";
+  }catch(e){
+    loginMsg.innerText = e.message;
+  }
+}
+function logout(){ auth.signOut(); }
+
+function showTab(name,btn){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));
+  document.getElementById("tab-"+name).classList.remove("hidden");
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function pad(n){return String(n).padStart(3,"0")}
+function slugSeries(id){return id.replaceAll("_","-")}
+function today(){return new Date().toISOString().slice(0,10)}
+function subjectName(id){return SUBJECTS.find(s=>s[0]===id)?.[1] || id}
+
+function getJson(id){
+  const data = JSON.parse(document.getElementById(id).value);
+  if(!Array.isArray(data)) throw new Error("JSON must be array");
+  data.forEach((q,i)=>{
+    if(!q.question || !Array.isArray(q.options) || q.options.length !== 4) throw new Error("Invalid question at " + (i+1));
+    if(q.correct === undefined || Number(q.correct) < 0 || Number(q.correct) > 3) throw new Error("Invalid correct index at " + (i+1));
+  });
+  return data;
+}
+
+function sampleJson(id){
+  document.getElementById(id).value = JSON.stringify([
+    {
+      question:"Which nutrient is the main source of energy?",
+      options:["Protein","Fat","Vitamin","Mineral"],
+      correct:1,
+      explanation:"Fat provides 9 kcal/g and is a concentrated energy source.",
+      topic:"Nutrition"
+    }
+  ],null,2);
+}
+
+function validateBox(box,msg){
+  try{
+    const data = getJson(box);
+    document.getElementById(msg).innerText = "Valid JSON. Questions: " + data.length;
+  }catch(e){document.getElementById(msg).innerText = e.message}
+}
+
+function shuffleArr(a){return [...a].sort(()=>Math.random()-0.5)}
+
+function shuffleBox(box,msg){
+  try{
+    let data = getJson(box);
+    data = data.map(q=>{
+      const correctText = q.options[Number(q.correct)];
+      const opts = shuffleArr(q.options);
+      return {...q, options:opts, correct:opts.indexOf(correctText)};
     });
+    document.getElementById(box).value = JSON.stringify(data,null,2);
+    document.getElementById(msg).innerText = "Shuffled again. You can press again.";
+  }catch(e){document.getElementById(msg).innerText = e.message}
+}
 
-    // Helper Functions
-    function isAdmin() {
-      return currentUser && (ADMIN_EMAILS.includes(currentUser.email) || ADMIN_UIDS.includes(currentUser.uid));
+async function uploadSubjectTest(){
+  try{
+    const sid = subjectId.value;
+    const tnum = Number(subjectTestNumber.value);
+    const qs = getJson("subjectQuestions");
+    const docId = `${sid}-test-${pad(tnum)}`;
+    await db.collection("subject_tests").doc(docId).set({
+      subject_id:sid,
+      subject_name:subjectName(sid),
+      topic_name:subjectTopic.value || subjectName(sid),
+      test_number:tnum,
+      time_limit:Number(subjectTimeLimit.value),
+      total_questions:qs.length,
+      questions:qs,
+      test_url:`/p/subject-test.html?subject=${sid}&test=${tnum}`,
+      solution_url:`/p/subject-test.html?subject=${sid}&test=${tnum}&mode=solution`,
+      uploaded_at:new Date().toISOString(),
+      uploaded_by:auth.currentUser.email
+    });
+    subjectMsg.innerText = "Uploaded: " + docId;
+  }catch(e){subjectMsg.innerText = e.message}
+}
+
+async function uploadSeriesTest(){
+  try{
+    const sid = seriesId.value;
+    const tnum = Number(seriesTestNumber.value);
+    const qs = getJson("seriesQuestions");
+    const name = SERIES[sid];
+    const docId = `${slugSeries(sid)}-test-${pad(tnum)}`;
+    await db.collection("subject_tests").doc(docId).set({
+      series_id:sid,
+      series_name:name,
+      test_number:tnum,
+      topic_name:seriesTopic.value || `${name} - Day ${tnum}`,
+      unlockDate:seriesUnlockDate.value || today(),
+      time_limit:Number(seriesTimeLimit.value),
+      total_questions:qs.length,
+      questions:qs,
+      shuffleQuestions:true,
+      shuffleOptions:true,
+      uploaded_at:new Date().toISOString(),
+      uploaded_by:auth.currentUser.email
+    });
+    seriesMsg.innerText = "Uploaded: " + docId;
+  }catch(e){seriesMsg.innerText = e.message}
+}
+
+function fill365(){
+  autoWeightage.value = JSON.stringify({
+    "medical-surgical-nursing":25,
+    "pharmacology":12,
+    "mental-health-nursing":10,
+    "pediatric-nursing":10,
+    "obstetrics-and-gynaecology":10,
+    "community-health-nursing":8,
+    "nursing-management":7,
+    "anatomy-and-physiology":6,
+    "nursing-foundation":5,
+    "research-and-statistics":3,
+    "microbiology":2,
+    "nutrition":2
+  },null,2);
+}
+function fillNorcet(){
+  autoWeightage.value = JSON.stringify({
+    "medical-surgical-nursing":30,
+    "pharmacology":15,
+    "mental-health-nursing":12,
+    "pediatric-nursing":10,
+    "obstetrics-and-gynaecology":10,
+    "community-health-nursing":8,
+    "nursing-management":5,
+    "anatomy-and-physiology":4,
+    "nursing-foundation":3,
+    "research-and-statistics":3
+  },null,2);
+}
+
+async function getPool(sid){
+  const snap = await db.collection("subject_tests").where("subject_id","==",sid).get();
+  let pool=[];
+  snap.forEach(d=>{
+    const x=d.data();
+    if(x.series_id) return;
+    if(Array.isArray(x.questions)){
+      pool.push(...x.questions.map(q=>({...q, subject:sid, topic:q.topic || x.topic_name || sid})));
     }
+  });
+  return pool;
+}
 
-    function shuffleArray(arr) {
-      return arr
-        .map(v => ({ v, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ v }) => v);
+async function autoGenerate(){
+  try{
+    const sid = autoSeriesId.value;
+    const name = SERIES[sid];
+    const tnum = Number(autoTestNumber.value);
+    const total = Number(autoTotal.value);
+    const weight = JSON.parse(autoWeightage.value || "{}");
+    const sum = Object.values(weight).reduce((a,b)=>a+Number(b),0);
+    if(sum !== total) throw new Error("Weightage total "+sum+" hai, Total Questions "+total+" hona chahiye.");
+
+    autoMsg.innerText = "Generating...";
+    let selected=[];
+    for(const [sub,count] of Object.entries(weight)){
+      const pool = await getPool(sub);
+      if(pool.length < Number(count)) throw new Error(`${sub}: required ${count}, found ${pool.length}`);
+      selected.push(...shuffleArr(pool).slice(0,Number(count)));
     }
+    selected = shuffleArr(selected);
 
-    function showMessage(elementId, message, type = 'info') {
-      const el = document.getElementById(elementId);
-      if (el) {
-        el.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
-        setTimeout(() => { el.innerHTML = ''; }, 5000);
-      }
-    }
+    const docId = `${slugSeries(sid)}-test-${pad(tnum)}`;
+    await db.collection("subject_tests").doc(docId).set({
+      series_id:sid,
+      series_name:name,
+      test_number:tnum,
+      topic_name:`${name} - Day ${tnum}`,
+      unlockDate:autoUnlockDate.value || today(),
+      time_limit:Number(autoTimeLimit.value),
+      total_questions:selected.length,
+      questions:selected,
+      shuffleQuestions:true,
+      shuffleOptions:true,
+      autoGenerated:true,
+      weightage:weight,
+      uploaded_at:new Date().toISOString(),
+      uploaded_by:auth.currentUser.email
+    });
+    autoMsg.innerText = "Generated: " + docId;
+  }catch(e){autoMsg.innerText = e.message}
+}
 
-    // Tab Switching
-    window.switchTab = function(tabName) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-      
-      const targetTab = document.getElementById(tabName);
-      if (targetTab) {
-        targetTab.classList.add('active');
-        event.target.classList.add('active');
-        
-        if (tabName === 'dashboard') loadDashboardStats();
-        if (tabName === 'manage') loadTests();
-        if (tabName === 'doubts') loadDoubts();
-        if (tabName === 'series') loadSeries();
-      }
-    };
+async function loadLatest(){
+  const snap = await db.collection("subject_tests").orderBy("uploaded_at","desc").limit(50).get();
+  let html = "<table><tr><th>Doc ID</th><th>Type</th><th>Name</th><th>Test</th><th>Q</th><th>Action</th></tr>";
+  snap.forEach(d=>{
+    const x=d.data();
+    html += `<tr>
+      <td>${d.id}</td>
+      <td>${x.series_id ? "Series" : "Subject"}</td>
+      <td>${x.series_name || x.subject_name || "-"}<br><small>${x.topic_name || ""}</small></td>
+      <td>${x.test_number || "-"}</td>
+      <td>${x.total_questions || x.questions?.length || 0}</td>
+      <td><button class="red" onclick="deleteTest('${d.id}')">Delete</button></td>
+    </tr>`;
+  });
+  html += "</table>";
+  latestBox.innerHTML = html;
+}
 
-    // Dashboard Statistics
-    async function loadDashboardStats() {
-      try {
-        const [seriesSnap, testsSnap, bankSnap, doubtsSnap] = await Promise.all([
-          getDocs(collection(db, "test_series")),
-          getDocs(collection(db, "subject_tests")),
-          getDocs(collection(db, "question_bank")),
-          getDocs(query(collection(db, "doubts"), where("status", "==", "Pending")))
-        ]);
-        
-        document.getElementById("totalSeries").textContent = seriesSnap.size;
-        document.getElementById("totalTests").textContent = testsSnap.size;
-        document.getElementById("totalQuestions").textContent = bankSnap.size;
-        document.getElementById("totalDoubts").textContent = doubtsSnap.size;
-      } catch (e) {
-        console.error("Stats load error:", e);
-      }
-    }
-
-    // Series Management
-    window.createNewSeries = async function() {
-      if (!isAdmin()) return alert("❌ Access denied. Please login first.");
-      
-      const seriesId = document.getElementById("newSeriesId").value.trim().toLowerCase();
-      const seriesName = document.getElementById("newSeriesName").value.trim();
-      const mode = document.getElementById("newSeriesMode").value;
-      const status = document.getElementById("newSeriesStatus").value;
-      const totalDays = parseInt(document.getElementById("newSeriesDays").value) || 0;
-      const description = document.getElementById("newSeriesDesc").value.trim();
-      
-      if (!seriesId || !seriesName) {
-        showMessage("seriesStatus", "❌ Series ID and Name are required!", "error");
-        return;
-      }
-      
-      if (!/^[a-z0-9_]+$/.test(seriesId)) {
-        showMessage("seriesStatus", "❌ Series ID should contain only lowercase letters, numbers, and underscores!", "error");
-        return;
-      }
-      
-      try {
-        // Check if series already exists
-        const existingQuery = query(collection(db, "test_series"), where("series_id", "==", seriesId));
-        const existingSnap = await getDocs(existingQuery);
-        
-        if (!existingSnap.empty) {
-          showMessage("seriesStatus", "❌ Series ID already exists! Please use a different ID.", "error");
-          return;
-        }
-        
-        await addDoc(collection(db, "test_series"), {
-          series_id: seriesId,
-          series_name: seriesName,
-          mode: mode,
-          status: status,
-          total_days: totalDays,
-          description: description,
-          createdAt: serverTimestamp(),
-          createdBy: currentUser.email,
-          createdByUid: currentUser.uid
-        });
-        
-        showMessage("seriesStatus", "✅ Series created successfully!", "success");
-        
-        // Clear form
-        ["newSeriesId", "newSeriesName", "newSeriesDays", "newSeriesDesc"].forEach(id => {
-          document.getElementById(id).value = "";
-        });
-        
-        await updateAllDropdowns();
-        loadSeries();
-        loadDashboardStats();
-      } catch (e) {
-        showMessage("seriesStatus", `❌ Error: ${e.message}`, "error");
-      }
-    };
-
-    window.loadSeries = async function() {
-      if (!isAdmin()) return alert("❌ Access denied. Please login first.");
-      
-      const box = document.getElementById("seriesList");
-      box.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading series...</p></div>';
-      
-      try {
-        const snap = await getDocs(query(collection(db, "test_series"), orderBy("createdAt", "desc")));
-        box.innerHTML = "";
-        
-        if (snap.empty) {
-          box.innerHTML = '<div class="status-message status-info">📭 No custom series found. Create one above!</div>';
-          return;
-        }
-        
-        snap.forEach(d => {
-          const s = d.data();
-          const statusColor = s.status === 'active' ? 'success' : s.status === 'coming_soon' ? 'warning' : 'error';
-          const div = document.createElement("div");
-          div.className = "series-item";
-          div.innerHTML = `
-            <div class="flex-between">
-              <div>
-                <h3>${s.series_name} <span class="badge badge-${statusColor}">${s.status}</span></h3>
-                <p style="color:#718096;">ID: ${s.series_id} | Mode: ${s.mode} | Days: ${s.total_days || 'N/A'}</p>
-                ${s.description ? `<p style="color:#4a5568;">📝 ${s.description}</p>` : ''}
-              </div>
-              <div>
-                <button class="btn btn-sm btn-warning" onclick="toggleSeriesStatus('${d.id}', '${s.status}')">
-                  ${s.status === 'active' ? '🔒 Deactivate' : '🔓 Activate'}
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteSeries('${d.id}')">🗑️ Delete</button>
-              </div>
-            </div>
-          `;
-          box.appendChild(div);
-        });
-      } catch (e) {
-        box.innerHTML = `<div class="status-message status-error">❌ Error loading series: ${e.message}</div>`;
-      }
-    };
-
-    window.toggleSeriesStatus = async function(id, currentStatus) {
-      if (!isAdmin()) return alert("❌ Access denied.");
-      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      try {
-        await updateDoc(doc(db, "test_series", id), { status: newStatus });
-        showMessage("seriesStatus", `✅ Status updated to: ${newStatus}`, "success");
-        loadSeries();
-      } catch (e) {
-        alert("Error: " + e.message);
-      }
-    };
-
-    window.deleteSeries = async function(id) {
-      if (!isAdmin()) return alert("❌ Access denied.");
-      if (!confirm("⚠️ Are you sure? This will only delete the series metadata, not the tests.")) return;
-      try {
-        await deleteDoc(doc(db, "test_series", id));
-        showMessage("seriesStatus", "✅ Series deleted successfully!", "success");
-        loadSeries();
-        await updateAllDropdowns();
-        loadDashboardStats();
-      } catch (e) {
-        alert("Error: " + e.message);
-      }
-    };
-
-    // Dynamic Dropdown Updates
-    async function updateAllDropdowns() {
-      try {
-        const snap = await getDocs(collection(db, "test_series"));
-        const allSeries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const activeSeries = allSeries.filter(s => s.status === 'active');
-        
-        // Update subject_id dropdown
-        const subjectIdSelect = document.getElementById("subject_id");
-        subjectIdSelect.innerHTML = `
-          <option value="daily_morning">Daily Morning Test</option>
-          <option value="daily_evening">Daily Evening Test</option>
-          <option value="subject_test">Subject Test</option>
-        `;
-        activeSeries.forEach(s => {
-          subjectIdSelect.innerHTML += `<option value="${s.series_id}">${s.series_name}</option>`;
-        });
-        
-        // Update testSeries dropdown
-        const testSeriesSelect = document.getElementById("testSeries");
-        testSeriesSelect.innerHTML = `
-          <option value="">Select Series</option>
-          <option value="daily_morning">Daily Morning Test</option>
-          <option value="daily_evening">Daily Evening Test</option>
-        `;
-        activeSeries.forEach(s => {
-          testSeriesSelect.innerHTML += `<option value="${s.series_id}">${s.series_name}</option>`;
-        });
-        
-        // Update autoSeries dropdown
-        const autoSeriesSelect = document.getElementById("autoSeries");
-        autoSeriesSelect.innerHTML = `
-          <option value="daily_morning">Daily Morning Test</option>
-          <option value="daily_evening">Daily Evening Test</option>
-        `;
-        activeSeries.forEach(s => {
-          autoSeriesSelect.innerHTML += `<option value="${s.series_id}">${s.series_name}</option>`;
-        });
-        
-        // Update filterSeries dropdown
-        const filterSeriesSelect = document.getElementById("filterSeries");
-        if (filterSeriesSelect) {
-          filterSeriesSelect.innerHTML = '<option value="">All Series</option>';
-          filterSeriesSelect.innerHTML += '<option value="daily_morning">Daily Morning</option>';
-          filterSeriesSelect.innerHTML += '<option value="daily_evening">Daily Evening</option>';
-          activeSeries.forEach(s => {
-            filterSeriesSelect.innerHTML += `<option value="${s.series_id}">${s.series_name}</option>`;
-          });
-        }
-      } catch (e) {
-        console.error("Error updating dropdowns:", e);
-      }
-    }
-
-    // Test Upload Functions
-    window.toggleSubjectDropdown = function() {
-      const type = document.getElementById("subject_id").value;
-      const dd = document.getElementById("subjectDropdown");
-      dd.style.display = type === "subject_test" ? "block" : "none";
-    };
-
-    window.applySubjectDropdown = function() {
-      const dd = document.getElementById("subjectDropdown");
-      const subjectNameInput = document.getElementById("subject_name");
-      const selectedText = dd.options[dd.selectedIndex]?.text || "";
-      if (dd.value) {
-        subjectNameInput.value = selectedText;
-      }
-    };
-
-    window.showJsonFormat = function() {
-      const sample = [
-        {
-          question: "Which vitamin is essential for blood clotting?",
-          options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin K"],
-          correct: 3,
-          explanation: "Vitamin K is essential for synthesis of clotting factors.",
-          subject: "Nutrition",
-          topic: "Vitamins",
-          difficulty: "Easy"
-        },
-        {
-          question: "Normal adult pulse rate is:",
-          options: ["40-60/min", "60-100/min", "100-120/min", "120-140/min"],
-          correct: 1,
-          explanation: "Normal adult pulse rate is 60-100 beats per minute.",
-          subject: "Fundamentals",
-          topic: "Vital Signs",
-          difficulty: "Easy"
-        }
-      ];
-      document.getElementById("questions").value = JSON.stringify(sample, null, 2);
-      document.getElementById("jsonReport").innerHTML = 
-        '<div class="status-message status-info">📄 JSON format added. Edit this sample and paste your questions.</div>';
-    };
-
-    function getQuestionsFromBox() {
-      const raw = document.getElementById("questions").value.trim();
-      if (!raw) throw new Error("Questions JSON is empty");
-      const questions = JSON.parse(raw);
-      if (!Array.isArray(questions)) throw new Error("JSON should be an array");
-      
-      questions.forEach((q, i) => {
-        if (!q.question) throw new Error(`Question missing at index ${i}`);
-        if (!Array.isArray(q.options) || q.options.length < 2) throw new Error(`Options missing/invalid at index ${i}`);
-        if (q.correct === undefined || q.correct === null) throw new Error(`Correct answer missing at index ${i}`);
-        const c = Number(q.correct);
-        if (c < 0 || c >= q.options.length) throw new Error(`Correct index invalid at index ${i}`);
-      });
-      
-      return questions;
-    }
-
-    window.validateQuestionsJson = function() {
-      try {
-        const questions = getQuestionsFromBox();
-        document.getElementById("jsonReport").innerHTML = 
-          `<div class="status-message status-success">✅ JSON Valid! Total Questions: ${questions.length}</div>`;
-      } catch (e) {
-        document.getElementById("jsonReport").innerHTML = 
-          `<div class="status-message status-error">❌ Error: ${e.message}</div>`;
-      }
-    };
-
-    window.shufflePreview = function() {
-      try {
-        let questions = getQuestionsFromBox();
-        questions = shuffleArray(questions);
-        questions = questions.map(q => {
-          const oldCorrect = Number(q.correct);
-          const correctText = q.options[oldCorrect];
-          const newOptions = shuffleArray([...q.options]);
-          return {
-            ...q,
-            options: newOptions,
-            correct: newOptions.indexOf(correctText)
-          };
-        });
-        
-        document.getElementById("questions").value = JSON.stringify(questions, null, 2);
-        
-        const count = { A: 0, B: 0, C: 0, D: 0, Other: 0 };
-        questions.forEach(q => {
-          const c = Number(q.correct);
-          if (c === 0) count.A++;
-          else if (c === 1) count.B++;
-          else if (c === 2) count.C++;
-          else if (c === 3) count.D++;
-          else count.Other++;
-        });
-        
-        const total = questions.length;
-        const pct = n => total ? Math.round((n / total) * 100) : 0;
-        
-        document.getElementById("jsonReport").innerHTML = `
-          <div class="status-message status-info">
-            <b>🔀 Shuffled Successfully!</b><br>
-            <b>Distribution:</b> A: ${count.A} (${pct(count.A)}%) | 
-            B: ${count.B} (${pct(count.B)}%) | 
-            C: ${count.C} (${pct(count.C)}%) | 
-            D: ${count.D} (${pct(count.D)}%)<br>
-            <b>Total:</b> ${total} questions
-          </div>
-        `;
-      } catch (e) {
-        document.getElementById("jsonReport").innerHTML = 
-          `<div class="status-message status-error">❌ Error: ${e.message}</div>`;
-      }
-    };
-
-    window.uploadTest = async function() {
-      if (!isAdmin()) return alert("❌ Access denied. Please login first.");
-      
-      try {
-        const questions = getQuestionsFromBox();
-        const subjectId = document.getElementById("subject_id").value;
-        const isSubjectTest = subjectId === "subject_test";
-        
-        const data = {
-          subject_id: isSubjectTest ? document.getElementById("subjectDropdown").value : subjectId,
-          subject_name: document.getElementById("subject_name").value || "Unnamed",
-          topic_name: document.getElementById("topic_name").value || "General",
-          test_number: Number(document.getElementById("test_number").value) || Date.now(),
-          time_limit: Number(document.getElementById("time_limit").value) || 60,
-          unlockDate: document.getElementById("unlockDate").value || new Date().toISOString().split('T')[0],
-          difficulty: document.getElementById("difficulty").value || "Medium",
-          shuffleQuestions: document.getElementById("shuffleQuestions").checked,
-          shuffleOptions: document.getElementById("shuffleOptions").checked,
-          questions: questions,
-          questions_count: questions.length,
-          createdAt: serverTimestamp(),
-          createdBy: currentUser.email,
-          createdByUid: currentUser.uid
-        };
-        
-        const docRef = await addDoc(collection(db, "subject_tests"), data);
-        showMessage("uploadStatus", `✅ Test uploaded successfully! (ID: ${docRef.id})`, "success");
-        loadDashboardStats();
-        
-        // Clear form
-        document.getElementById("questions").value = "";
-        document.getElementById("jsonReport").innerHTML = "";
-      } catch (e) {
-        showMessage("uploadStatus", `❌ Upload failed: ${e.message}`, "error");
-      }
-    };
-
-    // Question Bank Functions
-    window.uploadQuestionBank = async function() {
-      if (!isAdmin()) return alert("❌ Access denied. Please login first.");
-      
-      try {
-        const list = JSON.parse(document.getElementById("bankQuestions").value);
-        if (!Array.isArray(list)) throw new Error("Should be an array of questions");
-        
-        let uploaded = 0;
-        for (const q of list) {
-          if (!q.question || !q.options || q.correct === undefined) {
-            console.warn("Skipping invalid question:", q);
-            continue;
-          }
-          
-          await addDoc(collection(db, "question_bank"), {
-            ...q,
-            correct: Number(q.correct),
-            createdAt: serverTimestamp(),
-            createdBy: currentUser.email
-          });
-          uploaded++;
-        }
-        
-        showMessage("bankStatus", `✅ ${uploaded} questions uploaded to bank!`, "success");
-        document.getElementById("bankQuestions").value = "";
-        loadDashboardStats();
-      } catch (e) {
-        showMessage("bankStatus", `❌ Error: ${e.message}`, "error");
-      }
-    };
-
-    // Auto Generate Test
-    window.autoGenerateTest = async function() {
-      if (!isAdmin()) return alert("❌ Access denied. Please login first.");
-      
-      try {
-        const series = document.getElementById("autoSeries").value;
-        const total = Number(document.getElementById("autoTotal").value);
-        const timer = Number(document.getElementById("autoTimer").value);
-        const weightage = JSON.parse(document.getElementById("weightage").value || "{}");
-        
-        if (!total || !timer) return alert("❌ Total questions and timer are required!");
-        
-        const bankSnap = await getDocs(collection(db, "question_bank"));
-        const bank = bankSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        
-        if (bank.length === 0) return alert("❌ Question bank is empty!");
-        
-        let selected = [];
-        for (const [subject, count] of Object.entries(weightage)) {
-          const pool = bank.filter(q =>
-            String(q.subject || "").toLowerCase() === String(subject).toLowerCase()
-          );
-          
-          const shuffled = pool.sort(() => Math.random() - 0.5);
-          selected.push(...shuffled.slice(0, Number(count)));
-        }
-        
-        if (selected.length < total) {
-          const usedIds = new Set(selected.map(q => q.id));
-          const remaining = bank.filter(q => !usedIds.has(q.id)).sort(() => Math.random() - 0.5);
-          selected.push(...remaining.slice(0, total - selected.length));
-        }
-        
-        selected = shuffleArray(selected).slice(0, total).map(q => ({
-          question: q.question,
-          options: q.options,
-          correct: Number(q.correct),
-          explanation: q.explanation || "",
-          subject: q.subject || "",
-          topic: q.topic || "",
-          difficulty: q.difficulty || "Medium"
-        }));
-        
-        const seriesName = await getSeriesNameFromFirestore(series);
-        
-        await addDoc(collection(db, "subject_tests"), {
-          subject_id: series,
-          subject_name: seriesName,
-          topic_name: "Auto Generated Test",
-          test_number: Date.now(),
-          time_limit: timer,
-          unlockDate: new Date().toISOString().slice(0, 10),
-          shuffleQuestions: true,
-          shuffleOptions: true,
-          questions: selected,
-          questions_count: selected.length,
-          autoGenerated: true,
-          weightage: weightage,
-          createdAt: serverTimestamp(),
-          createdBy: currentUser.email,
-          createdByUid: currentUser.uid
-        });
-        
-        alert(`✅ Auto generated test uploaded! ${selected.length} questions.`);
-        loadDashboardStats();
-      } catch (e) {
-        alert("❌ Auto generate error: " + e.message);
-      }
-    };
-
-    async function getSeriesNameFromFirestore(seriesId) {
-      const commonNames = {
-        "365_days": "365 Days Challenge",
-        "norcet_100_days": "NORCET 100 Days Challenge",
-        "daily_morning": "Daily Morning Test",
-        "daily_evening": "Daily Evening Test"
-      };
-      
-      if (commonNames[seriesId]) return commonNames[seriesId];
-      
-      try {
-        const q = query(collection(db, "test_series"), where("series_id", "==", seriesId));
-        const snap = await getDocs(q);
-        return snap.empty ? seriesId : snap.docs[0].data().series_name;
-      } catch (e) {
-        return seriesId;
-      }
-    }
-
-    // Test Management
-    window.loadTests = async function() {
-      if (!isAdmin()) return alert("❌ Access denied. Please login first.");
-      
-      const box = document.getElementById("testList");
-      box.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading tests...</p></div>';
-      
-      try {
-        const filterSeries = document.getElementById("filterSeries")?.value || "";
-        let q = query(collection(db, "subject_tests"), orderBy("createdAt", "desc"));
-        
-        if (filterSeries) {
-          q = query(collection(db, "subject_tests"), where("subject_id", "==", filterSeries), orderBy("createdAt", "desc"));
-        }
-        
-        const snap = await getDocs(q);
-        box.innerHTML = "";
-        
-        if (snap.empty) {
-          box.innerHTML = '<div class="status-message status-info">📭 No tests found.</div>';
-          return;
-        }
-        
-        snap.forEach(d => {
-          const t = d.data();
-          const div = document.createElement("div");
-          div.className = "test-item";
-          div.innerHTML = `
-            <div class="flex-between">
-              <div>
-                <h3>${t.subject_name || t.subject_id}</h3>
-                <p style="color:#718096;">
-                  Test #${t.test_number || "N/A"} | 
-                  Questions: ${t.questions_count || t.questions?.length || 0} | 
-                  Time: ${t.time_limit}min | 
-                  Date: ${t.unlockDate || "N/A"} |
-                  ${t.autoGenerated ? '🤖 Auto' : '👤 Manual'}
-                </p>
-                ${t.topic_name ? `<p style="color:#4a5568;">📚 ${t.topic_name}</p>` : ''}
-              </div>
-              <button class="btn btn-sm btn-danger" onclick="deleteTest('${d.id}')">🗑️ Delete</button>
-            </div>
-          `;
-          box.appendChild(div);
-        });
-      } catch (e) {
-        box.innerHTML = `<div class="status-message status-error">❌ Error: ${e.message}</div>`;
-      }
-    };
-
-    window.deleteTest = async function(id) {
-      if (!isAdmin()) return alert("❌ Access denied.");
-      if (!confirm("⚠️ Are you sure you want to delete this test?")) return;
-      
-      try {
-        await deleteDoc(doc(db, "subject_tests", id));
-        alert("✅ Test deleted!");
-        loadTests();
-        loadDashboardStats();
-      } catch (e) {
-        alert("Error: " + e.message);
-      }
-    };
-
-    // Doubt Management
-    window.loadDoubts = async function() {
-      if (!isAdmin()) return alert("❌ Access denied. Please login first.");
-      
-      const box = document.getElementById("doubtList");
-      box.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading doubts...</p></div>';
-      
-      try {
-        const snap = await getDocs(query(collection(db, "doubts"), orderBy("createdAt", "desc")));
-        box.innerHTML = "";
-        
-        if (snap.empty) {
-          box.innerHTML = '<div class="status-message status-info">📭 No doubts found.</div>';
-          return;
-        }
-        
-        snap.forEach(d => {
-          const x = d.data();
-          const statusColor = x.status === "Answered" ? "success" : "warning";
-          const div = document.createElement("div");
-          div.className = "doubt-item";
-          div.innerHTML = `
-            <h3>${x.subject || "No Subject"} <span class="badge badge-${statusColor}">${x.status || "Pending"}</span></h3>
-            <p><b>👤 User:</b> ${x.userName || "Anonymous"} ${x.email ? `(${x.email})` : ""}</p>
-            <p><b>❓ Doubt:</b> ${x.question || ""}</p>
-            ${x.answer ? `<p><b>✅ Answer:</b> ${x.answer}</p>` : ""}
-            <div class="form-group" style="margin-top:10px;">
-              <textarea id="answer_${d.id}" rows="3" placeholder="Write admin answer...">${x.answer || ""}</textarea>
-            </div>
-            <div style="margin-top:10px;">
-              <button class="btn btn-sm btn-success" onclick="replyDoubt('${d.id}')">💾 Save Reply</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteDoubt('${d.id}')">🗑️ Delete Doubt</button>
-            </div>
-          `;
-          box.appendChild(div);
-        });
-      } catch (e) {
-        box.innerHTML = `<div class="status-message status-error">❌ Error: ${e.message}</div>`;
-      }
-    };
-
-    window.replyDoubt = async function(id) {
-      if (!isAdmin()) return alert("❌ Access denied.");
-      
-      const answer = document.getElementById("answer_" + id).value.trim();
-      if (!answer) return alert("❌ Answer cannot be empty!");
-      
-      try {
-        await updateDoc(doc(db, "doubts", id), {
-          answer: answer,
-          status: "Answered",
-          answeredAt: serverTimestamp(),
-          answeredBy: currentUser.email,
-          answeredByUid: currentUser.uid
-        });
-        
-        alert("✅ Reply saved successfully!");
-        loadDoubts();
-        loadDashboardStats();
-      } catch (e) {
-        alert("Error: " + e.message);
-      }
-    };
-
-    window.deleteDoubt = async function(id) {
-      if (!isAdmin()) return alert("❌ Access denied.");
-      if (!confirm("⚠️ Delete this doubt permanently?")) return;
-      
-      try {
-        await deleteDoc(doc(db, "doubts", id));
-        alert("✅ Doubt deleted!");
-        loadDoubts();
-        loadDashboardStats();
-      } catch (e) {
-        alert("Error: " + e.message);
-      }
-    };
-
-    // Authentication
-    window.loginAdmin = async function() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      
-      if (!email || !password) {
-        showMessage("loginMessage", "❌ Please enter email and password!", "error");
-        return;
-      }
-      
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showMessage("loginMessage", "✅ Login successful!", "success");
-      } catch (e) {
-        showMessage("loginMessage", `❌ Login failed: ${e.message}`, "error");
-      }
-    };
-
-    window.logoutAdmin = async function() {
-      try {
-        await signOut(auth);
-        showMessage("loginMessage", "✅ Logged out successfully!", "success");
-      } catch (e) {
-        showMessage("loginMessage", `❌ Logout failed: ${e.message}`, "error");
-      }
-    };
-
-    // Initial Load
-    if (currentUser && isAdmin()) {
-      updateAllDropdowns();
-      loadDashboardStats();
-    }
-  </script>
+async function deleteTest(id){
+  if(!confirm("Delete " + id + "?")) return;
+  await db.collection("subject_tests").doc(id).delete();
+  loadLatest();
+}
+</script>
 </body>
 </html>
