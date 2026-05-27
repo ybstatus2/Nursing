@@ -11,6 +11,7 @@ jobs:
       - run: npm install
       - run: CI=false npm run build
       - run: npm install @capacitor/core @capacitor/cli @capacitor/android
+      - run: rm -rf android
       - run: npx cap add android
       - uses: actions/setup-java@v4
         with:
