@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { db, auth } from "./firebase";
-import { collection, getDocs, query, where, addDoc, deleteDoc, doc, getDoc, serverTimestamp } from "firebase/firestore";
-import { 
-  Timer, Flag, Send, AlertTriangle,
-  Grid3X3, ArrowLeft, ChevronLeft, ChevronRight,
-  Eye, EyeOff, RotateCcw
+import { db, auth } from './firebase';
+import { collection, getDocs, query, where, addDoc, doc, getDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { useTheme } from './ThemeContext';
+import {
+  Timer, Flag, Send, AlertTriangle, Grid3X3, ArrowLeft,
+  ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw
 } from 'lucide-react';
 
 export default function SubjectTest() {
@@ -14,11 +13,12 @@ export default function SubjectTest() {
   const [searchParams] = useSearchParams();
   const testId = searchParams.get('testId');
   const navigate = useNavigate();
-  
+  const { darkMode } = useTheme();
+
   const [questions, setQuestions] = useState([]);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [reviewed, setReviewed] = useState({});
+  const [reviewed, setReviewed] = useState({}); // true if bookmarked
   const [timeLeft, setTimeLeft] = useState(1200);
   const [showPalette, setShowPalette] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
@@ -31,7 +31,7 @@ export default function SubjectTest() {
   }, [subjectId, testId]);
 
   useEffect(() => {
-    if(timeLeft <= 0) handleSubmit(true);
+    if (timeLeft <= 0) handleSubmit(true);
     const timer = setInterval(() => setTimeLeft(t => t > 0 ? t - 1 : 0), 1000);
     return () => clearInterval(timer);
   }, [timeLeft]);
@@ -39,17 +39,13 @@ export default function SubjectTest() {
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      // If testId provided, fetch specific test
       if (testId) {
         const docRef = doc(db, "subject_tests", testId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
           let qs = data.questions || [];
-          // Shuffle if needed
-          if (data.shuffleQuestions) {
-            qs = [...qs].sort(() => Math.random() - 0.5);
-          }
+          if (data.shuffleQuestions) qs = [...qs].sort(() => Math.random() - 0.5);
           if (data.shuffleOptions) {
             qs = qs.map(q => {
               const correctText = q.options[q.correct];
@@ -59,16 +55,10 @@ export default function SubjectTest() {
           }
           setQuestions(qs);
           setTimeLeft((data.time_limit || 30) * 60);
-          setTestInfo({
-            name: data.topic_name || `Test ${data.test_number || 1}`,
-            duration: data.time_limit || 30,
-            total: data.total_questions || qs.length,
-            testId: testId
-          });
+          setTestInfo({ name: data.topic_name || `Test ${data.test_number || 1}`, duration: data.time_limit || 30, total: qs.length, testId: testId });
         }
       }
-      // Series tests
-      else if (['daily_morning', 'daily_evening', 'norcet_100_days', '365_days'].includes(subjectId)) {
+      else if (['daily_morning', 'daily_evening', 'norcet_100_days', '365_days', 'daily_challenge'].includes(subjectId)) {
         const q = query(collection(db, "subject_tests"), where("series_id", "==", subjectId));
         const snap = await getDocs(q);
         if (!snap.empty) {
@@ -78,30 +68,17 @@ export default function SubjectTest() {
           if (data.shuffleQuestions) qs = [...qs].sort(() => Math.random() - 0.5);
           setQuestions(qs);
           setTimeLeft((data.time_limit || 20) * 60);
-          setTestInfo({
-            name: data.series_name || data.topic_name || subjectId,
-            duration: data.time_limit || 20,
-            total: data.total_questions || qs.length,
-            testId: latestDoc.id
-          });
+          setTestInfo({ name: data.series_name || data.topic_name || subjectId, duration: data.time_limit || 20, total: qs.length, testId: latestDoc.id });
         }
       }
-      // Subject tests - all MCQs
       else {
         const q = query(collection(db, "mcqs"), where("subject", "==", subjectId));
         const snap = await getDocs(q);
         const qs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setQuestions(qs.slice(0, 50)); // Max 50 questions
-        setTestInfo({
-          name: subjectId?.replace(/-/g, ' '),
-          duration: 20,
-          total: Math.min(qs.length, 50),
-          testId: null
-        });
+        setQuestions(qs.slice(0, 50));
+        setTestInfo({ name: subjectId?.replace(/-/g, ' '), duration: 20, total: Math.min(qs.length, 50), testId: null });
       }
-    } catch(e) {
-      console.log("Fetch error:", e.message);
-    }
+    } catch(e) { console.log(e); }
     setLoading(false);
   };
 
@@ -112,18 +89,38 @@ export default function SubjectTest() {
     return `${h>0?h+':':''}${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
   };
 
-  
   const handleAnswer = (optIndex) => {
-    const q = questions[currentQ];
-    if(q?.correct !== undefined) { // sound removed
-      if(optIndex === q.correct) { /* sound */ }
-      else { /* vibration */ }
-    }
     setAnswers({...answers, [currentQ]: optIndex});
   };
 
-  const toggleReview = () => {
-    setReviewed({...reviewed, [currentQ]: !reviewed[currentQ]});
+  // Bookmark toggle (save/remove from Firestore)
+  const toggleBookmark = async () => {
+    const q = questions[currentQ];
+    if (!q || !auth.currentUser) return;
+    const questionId = q.id || `${subjectId}_${currentQ}`;
+    try {
+      const bookRef = collection(db, 'bookmarks');
+      const existingSnap = await getDocs(query(bookRef,
+        where('userId', '==', auth.currentUser.uid),
+        where('questionId', '==', questionId)));
+      if (!existingSnap.empty) {
+        // Remove bookmark
+        existingSnap.forEach(async (d) => await deleteDoc(doc(db, 'bookmarks', d.id)));
+        setReviewed(prev => ({ ...prev, [currentQ]: false }));
+      } else {
+        // Add bookmark
+        await addDoc(bookRef, {
+          userId: auth.currentUser.uid,
+          questionId: questionId,
+          question: q.question,
+          options: q.options,
+          correct: q.correct,
+          subject: subjectId,
+          createdAt: serverTimestamp()
+        });
+        setReviewed(prev => ({ ...prev, [currentQ]: true }));
+      }
+    } catch(e) { console.log("Bookmark error:", e.message); }
   };
 
   const clearAnswer = () => {
@@ -154,11 +151,11 @@ export default function SubjectTest() {
     };
 
     try { await addDoc(collection(db, 'results'), result); } catch(e) { console.log(e); }
-    navigate('/result', { state: result });
+    navigate('/result', { replace: true, state: result });
   };
 
   if(loading) return (
-    <div className="h-screen flex items-center justify-center bg-gray-900">
+    <div className="h-screen flex items-center justify-center bg-gray-950">
       <div className="text-center">
         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="text-gray-400">Loading questions...</p>
@@ -167,10 +164,10 @@ export default function SubjectTest() {
   );
 
   if(questions.length === 0) return (
-    <div className="h-screen flex items-center justify-center bg-gray-900">
+    <div className="h-screen flex items-center justify-center bg-gray-950">
       <div className="text-center text-gray-400">
         <AlertTriangle className="mx-auto mb-4" size={40} />
-        <p>No questions found for this test</p>
+        <p>No questions found</p>
         <button onClick={() => navigate(-1)} className="mt-4 text-blue-400">Go Back</button>
       </div>
     </div>
@@ -182,15 +179,15 @@ export default function SubjectTest() {
   const notAnswered = questions.length - answeredCount;
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
-      {/* === TOP BAR === */}
-      <div className="bg-gray-800 border-b border-gray-700 px-3 py-2 flex-shrink-0">
+    <div className="h-screen flex flex-col bg-gray-950">
+      {/* Top Bar */}
+      <div className="bg-gray-900/90 backdrop-blur-xl border-b border-gray-800 px-3 py-2 flex-shrink-0">
         <div className="flex items-center justify-between mb-2">
-          <button onClick={() => navigate(-1)} className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
+          <button onClick={() => navigate(-1)} className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
             <ArrowLeft size={16} />
           </button>
           <h2 className="text-xs font-bold truncate mx-2">{testInfo.name}</h2>
-          <div className={`flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1 rounded-lg ${timeLeft < 300 ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-gray-700 text-yellow-400'}`}>
+          <div className={`flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1 rounded-lg ${timeLeft < 300 ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-gray-800 text-yellow-400'}`}>
             <Timer size={14} /> {formatTime(timeLeft)}
           </div>
         </div>
@@ -202,33 +199,32 @@ export default function SubjectTest() {
             <span className="text-gray-400">{notAnswered} ✗</span>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={() => setShowQuestionPaper(true)} className="w-7 h-7 bg-gray-700 rounded-lg flex items-center justify-center">
+            <button onClick={() => setShowQuestionPaper(true)} className="w-7 h-7 bg-gray-800 rounded-lg flex items-center justify-center">
               <Eye size={14} />
             </button>
-            <button onClick={() => setShowPalette(true)} className="px-2 py-1 bg-gray-700 rounded-lg text-xs font-bold flex items-center gap-1">
+            <button onClick={() => setShowPalette(true)} className="px-2 py-1 bg-gray-800 rounded-lg text-xs font-bold flex items-center gap-1">
               <Grid3X3 size={12} /> Q{currentQ+1}/{questions.length}
             </button>
           </div>
         </div>
       </div>
 
-      {/* === PROGRESS BAR === */}
+      {/* Progress Bar */}
       <div className="h-1 bg-gray-800 flex-shrink-0">
         <div className={`h-full transition-all duration-300 ${timeLeft < 300 ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-cyan-500'}`}
           style={{ width: `${((currentQ+1)/questions.length)*100}%` }}></div>
       </div>
 
-      {/* === SCROLLABLE CONTENT (Question + Options + Buttons) === */}
+      {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-3">
-          
           {/* Question Card */}
-          <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
+          <div className="bg-gray-800/80 rounded-2xl p-4 border border-gray-700">
             <div className="flex items-start justify-between mb-2">
               <span className="text-xs font-bold text-blue-400 bg-blue-500/20 px-2 py-1 rounded-lg">Q{currentQ+1}</span>
-              <button onClick={toggleReview} className={`p-1.5 rounded-lg text-xs flex items-center gap-1 ${reviewed[currentQ] ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-700 text-gray-400'}`}>
+              <button onClick={toggleBookmark} className={`p-1.5 rounded-lg text-xs flex items-center gap-1 ${reviewed[currentQ] ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700 text-gray-400'}`}>
                 <Flag size={12} fill={reviewed[currentQ] ? 'currentColor' : 'none'} />
-                {reviewed[currentQ] ? 'Marked' : 'Review'}
+                {reviewed[currentQ] ? 'Bookmarked' : 'Bookmark'}
               </button>
             </div>
             <p className="text-base leading-relaxed text-gray-100">{q.question}</p>
@@ -238,12 +234,12 @@ export default function SubjectTest() {
           <div className="space-y-2">
             {q.options?.map((opt, i) => (
               <button key={i} onClick={() => handleAnswer(i)}
-                className={`w-full p-3.5 text-left rounded-xl font-medium transition-all border text-sm ${
+                className={`w-full p-4 text-left rounded-xl font-medium transition-all border text-sm ${
                   answers[currentQ] === i 
-                    ? 'bg-blue-600/30 border-blue-500 text-white shadow-lg shadow-blue-500/20' 
-                    : 'bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700 hover:border-gray-500'
+                    ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg shadow-blue-500/10' 
+                    : 'bg-gray-800/40 border-gray-700 text-gray-300 hover:bg-gray-700 hover:border-gray-500'
                 }`}>
-                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold mr-2 ${
+                <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold mr-3 ${
                   answers[currentQ] === i ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300'
                 }`}>{String.fromCharCode(65 + i)}</span>
                 {opt}
@@ -251,52 +247,51 @@ export default function SubjectTest() {
             ))}
           </div>
 
-          {/* Action Buttons - Now inside scrollable area */}
+          {/* Navigation Buttons */}
           <div className="flex gap-2 pt-2">
             <button onClick={() => setCurrentQ(p => Math.max(0, p-1))} disabled={currentQ === 0}
-              className="flex-1 p-3 bg-gray-700 rounded-xl flex items-center justify-center gap-1 disabled:opacity-40 text-xs font-medium">
+              className="flex-1 py-3 bg-gray-800 rounded-xl flex items-center justify-center gap-1 disabled:opacity-40 text-xs font-medium">
               <ChevronLeft size={14} /> Prev
             </button>
-            <button onClick={clearAnswer} className="px-4 p-3 bg-gray-700 rounded-xl text-xs text-gray-400 font-medium">
+            <button onClick={clearAnswer} className="px-4 py-3 bg-gray-800 rounded-xl text-xs text-gray-400 font-medium">
               <RotateCcw size={14} />
             </button>
             <button onClick={() => setCurrentQ(p => Math.min(questions.length-1, p+1))} disabled={currentQ === questions.length-1}
-              className="flex-1 p-3 bg-blue-600 rounded-xl flex items-center justify-center gap-1 disabled:opacity-40 text-xs font-bold">
+              className="flex-1 py-3 bg-blue-600 rounded-xl flex items-center justify-center gap-1 disabled:opacity-40 text-xs font-bold">
               Next <ChevronRight size={14} />
             </button>
-            <button onClick={() => setShowSubmit(true)} className="px-5 p-3 bg-green-600 rounded-xl flex items-center gap-1 text-xs font-bold">
+            <button onClick={() => setShowSubmit(true)} className="px-5 py-3 bg-green-600 rounded-xl flex items-center gap-1 text-xs font-bold">
               <Send size={14} /> Submit
             </button>
           </div>
 
-          {/* Spacer */}
           <div className="h-4"></div>
         </div>
       </div>
 
-      {/* === MODALS === */}
+      {/* Modals */}
       {showPalette && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowPalette(false)}>
-          <div className="bg-gray-800 rounded-t-3xl sm:rounded-2xl p-5 w-full sm:max-w-md max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center" onClick={() => setShowPalette(false)}>
+          <div className="bg-gray-800 border border-gray-700 rounded-t-3xl sm:rounded-2xl p-5 w-full sm:max-w-md max-h-[80vh] overflow-y-auto animate-slideUp" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold">Question Palette</h3>
               <button onClick={() => setShowPalette(false)} className="text-2xl text-gray-400">&times;</button>
             </div>
             <div className="flex gap-3 mb-4 text-[10px] flex-wrap">
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-green-500 inline-block"></span> Answered</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-orange-500 inline-block"></span> Review</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-yellow-500 inline-block"></span> Bookmarked</span>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-gray-600 inline-block"></span> Not Visited</span>
             </div>
             <div className="grid grid-cols-5 gap-2">
               {questions.map((_, i) => (
                 <button key={i} onClick={() => { setCurrentQ(i); setShowPalette(false); }}
                   className={`p-3 rounded-xl text-xs font-bold relative ${
-                    reviewed[i] ? 'bg-orange-500/30 border border-orange-500 text-orange-400' :
+                    reviewed[i] ? 'bg-yellow-500/30 border border-yellow-500 text-yellow-400' :
                     answers[i] !== undefined ? 'bg-green-500/30 border border-green-500 text-green-400' :
                     i === currentQ ? 'bg-blue-500/30 border border-blue-500 text-blue-400' : 'bg-gray-700 text-gray-400'
                   }`}>
                   {i+1}
-                  {reviewed[i] && <span className="absolute top-0.5 right-0.5 text-orange-400 text-[8px]">⚑</span>}
+                  {reviewed[i] && <span className="absolute top-0.5 right-0.5 text-yellow-400 text-[8px]">⚑</span>}
                 </button>
               ))}
             </div>
@@ -305,8 +300,8 @@ export default function SubjectTest() {
       )}
 
       {showSubmit && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-sm animate-scaleIn">
             <AlertTriangle className="text-yellow-400 mx-auto mb-3" size={36} />
             <h3 className="font-bold text-center mb-2">Submit Test?</h3>
             <div className="bg-gray-700/50 rounded-xl p-3 mb-4 text-xs space-y-1">
@@ -316,18 +311,18 @@ export default function SubjectTest() {
             </div>
             {notAnswered > 0 && <p className="text-yellow-400 text-xs text-center mb-4">⚠️ {notAnswered} questions unanswered!</p>}
             <div className="flex gap-2">
-              <button onClick={() => setShowSubmit(false)} className="flex-1 p-3 bg-gray-700 rounded-xl text-xs font-bold">Cancel</button>
-              <button onClick={() => handleSubmit()} className="flex-1 p-3 bg-green-600 rounded-xl text-xs font-bold">Submit Now</button>
+              <button onClick={() => setShowSubmit(false)} className="flex-1 py-3 bg-gray-700 rounded-xl text-xs font-bold">Cancel</button>
+              <button onClick={() => handleSubmit()} className="flex-1 py-3 bg-green-600 rounded-xl text-xs font-bold">Submit Now</button>
             </div>
           </div>
         </div>
       )}
 
       {showQuestionPaper && (
-        <div className="fixed inset-0 bg-gray-900 z-50 overflow-y-auto">
-          <div className="sticky top-0 bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div className="fixed inset-0 bg-gray-950 z-50 overflow-y-auto">
+          <div className="sticky top-0 bg-gray-900 p-4 flex items-center justify-between border-b border-gray-800">
             <h3 className="font-bold">All Questions</h3>
-            <button onClick={() => setShowQuestionPaper(false)} className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
+            <button onClick={() => setShowQuestionPaper(false)} className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
               <EyeOff size={16} />
             </button>
           </div>

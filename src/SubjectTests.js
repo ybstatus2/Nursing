@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from './firebase';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-import { 
-  ArrowLeft, Play, FileText, X, BookOpen,
-  CheckCircle, Clock, ChevronRight, Eye
+import { db, auth } from './firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { useTheme } from './ThemeContext';
+import {
+  ArrowLeft, Play, FileText, X, Clock, CheckCircle,
+  ChevronRight, Eye, BookOpen
 } from 'lucide-react';
 
 const subjectNames = {
@@ -29,11 +30,19 @@ const subjectNames = {
 export default function SubjectTests() {
   const { subjectId } = useParams();
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
+
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTest, setSelectedTest] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [completedTests, setCompletedTests] = useState({});
+
+  const cardBg = darkMode ? 'bg-gray-800/80 backdrop-blur-sm' : 'bg-white';
+  const subText = darkMode ? 'text-gray-400' : 'text-gray-500';
+  const border = darkMode ? 'border-gray-700' : 'border-gray-200';
+  const bg = darkMode ? 'bg-gray-950' : 'bg-gray-50';
+  const headerBg = darkMode ? 'bg-gray-900/80' : 'bg-white';
 
   useEffect(() => {
     fetchTests();
@@ -42,34 +51,23 @@ export default function SubjectTests() {
 
   const fetchTests = async () => {
     try {
-      const q = query(
-        collection(db, "subject_tests"),
-        where("subject_id", "==", subjectId),
-        orderBy("test_number", "asc")
-      );
+      const q = query(collection(db, "subject_tests"), where("subject_id", "==", subjectId));
       const snap = await getDocs(q);
-      const testsList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setTests(testsList);
-    } catch(e) {
-      console.log("Fetch error:", e.message);
-    }
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.test_number || 0) - (b.test_number || 0));
+      setTests(list);
+    } catch(e) { console.log(e); }
     setLoading(false);
   };
 
   const fetchCompletedTests = async () => {
-    try {
-      const q = query(
-        collection(db, "results"),
-        where("subject", "==", subjectId)
-      );
-      const snap = await getDocs(q);
-      const completed = {};
-      snap.docs.forEach(d => {
-        const data = d.data();
-        if(data.testId) completed[data.testId] = true;
-      });
-      setCompletedTests(completed);
-    } catch(e) { console.log(e); }
+    if(!auth.currentUser) return;
+    const q = query(collection(db, "results"), where("userId", "==", auth.currentUser.uid), where("subject", "==", subjectId));
+    const snap = await getDocs(q);
+    const completed = {};
+    snap.docs.forEach(d => {
+      completed[d.data().testId || d.id] = true;
+    });
+    setCompletedTests(completed);
   };
 
   const handleTestClick = (test) => {
@@ -90,17 +88,15 @@ export default function SubjectTests() {
   const subjectName = subjectNames[subjectId] || subjectId?.replace(/-/g, ' ');
 
   return (
-    <div className="h-full flex flex-col bg-gray-900">
+    <div className={`h-full flex flex-col ${bg}`}>
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-900 to-gray-900 p-4 pt-6 flex-shrink-0">
-        <div className="flex items-center gap-3 mb-3">
-          <button onClick={() => navigate('/subjects')} className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h2 className="text-lg font-bold">{subjectName}</h2>
-            <p className="text-xs text-gray-400">{tests.length} tests available</p>
-          </div>
+      <div className={`${headerBg} border-b ${border} px-4 py-4 flex items-center gap-3 flex-shrink-0`}>
+        <button onClick={() => navigate('/subjects')} className={`w-9 h-9 ${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'} rounded-xl flex items-center justify-center transition-all`}>
+          <ArrowLeft size={18} />
+        </button>
+        <div>
+          <h2 className="text-lg font-bold">{subjectName}</h2>
+          <p className={`text-xs ${subText}`}>{tests.length} tests available</p>
         </div>
       </div>
 
@@ -111,47 +107,36 @@ export default function SubjectTests() {
             <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : tests.length === 0 ? (
-          <div className="text-center text-gray-400 py-12">
-            <BookOpen className="mx-auto mb-3" size={40} />
-            <p>No tests available yet</p>
-            <p className="text-xs mt-2">Tests will appear here once uploaded</p>
+          <div className="text-center py-16">
+            <BookOpen className={`mx-auto mb-4 ${subText}`} size={48} />
+            <p className={`text-lg font-medium ${subText}`}>No tests available yet</p>
+            <p className="text-xs text-gray-400 mt-2">Check back later or try another subject</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {tests.map((test, i) => (
               <div
                 key={test.id}
                 onClick={() => handleTestClick(test)}
-                className="bg-gray-800 rounded-2xl p-4 border border-gray-700 cursor-pointer active:bg-gray-700 transition-all hover:border-gray-600"
+                className={`${cardBg} border ${border} rounded-2xl p-4 cursor-pointer active:scale-[0.98] transition-all hover:border-gray-500`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Test Number Badge */}
+                  <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${
-                      completedTests[test.id] 
-                        ? 'bg-green-500/20 text-green-400' 
-                        : 'bg-blue-500/20 text-blue-400'
+                      completedTests[test.id] ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400'
                     }`}>
                       {test.test_number || i+1}
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm">
-                        {test.topic_name || `Test ${test.test_number || i+1}`}
-                      </h3>
+                      <h3 className="font-semibold text-sm">{test.topic_name || `Test ${test.test_number || i+1}`}</h3>
                       <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} /> {test.time_limit || 30} min
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <FileText size={12} /> {test.total_questions || test.questions?.length || 0} Qs
-                        </span>
+                        <span className="flex items-center gap-1"><Clock size={12} /> {test.time_limit || 30} min</span>
+                        <span className="flex items-center gap-1"><FileText size={12} /> {test.total_questions || test.questions?.length || 0} Qs</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {completedTests[test.id] && (
-                      <CheckCircle className="text-green-400" size={18} />
-                    )}
+                    {completedTests[test.id] && <CheckCircle className="text-green-400" size={18} />}
                     <ChevronRight size={18} className="text-gray-500" />
                   </div>
                 </div>
@@ -163,18 +148,16 @@ export default function SubjectTests() {
 
       {/* Popup Modal */}
       {showPopup && selectedTest && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowPopup(false)}>
-          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-            {/* Close Button */}
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowPopup(false)}>
+          <div className={`${cardBg} border ${border} rounded-2xl p-6 w-full max-w-sm animate-scaleIn`} onClick={e => e.stopPropagation()}>
             <div className="flex justify-end mb-2">
-              <button onClick={() => setShowPopup(false)} className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
+              <button onClick={() => setShowPopup(false)} className={`w-8 h-8 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} rounded-lg flex items-center justify-center transition-all`}>
                 <X size={16} />
               </button>
             </div>
 
-            {/* Test Info */}
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <FileText className="text-blue-400" size={28} />
               </div>
               <h3 className="font-bold text-lg">{selectedTest.topic_name || `Test ${selectedTest.test_number}`}</h3>
@@ -182,17 +165,16 @@ export default function SubjectTests() {
                 {selectedTest.total_questions || selectedTest.questions?.length || 0} Questions • {selectedTest.time_limit || 30} Minutes
               </p>
               {completedTests[selectedTest.id] && (
-                <span className="inline-block mt-2 text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full">
-                  ✓ Already Completed
+                <span className="inline-block mt-3 text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full">
+                  ✓ Completed
                 </span>
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <button
                 onClick={handleStartTest}
-                className="w-full p-4 bg-blue-600 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
               >
                 <Play size={18} /> Start Test
               </button>
@@ -200,7 +182,7 @@ export default function SubjectTests() {
               {completedTests[selectedTest.id] && (
                 <button
                   onClick={handleViewSolution}
-                  className="w-full p-4 bg-purple-600/20 border border-purple-500/30 rounded-xl font-bold flex items-center justify-center gap-2 text-purple-400 active:scale-95 transition-transform"
+                  className="w-full py-4 bg-purple-500/10 border border-purple-500/30 rounded-xl font-bold text-purple-400 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
                 >
                   <Eye size={18} /> View Solution
                 </button>
@@ -208,7 +190,7 @@ export default function SubjectTests() {
               
               <button
                 onClick={() => setShowPopup(false)}
-                className="w-full p-4 bg-gray-700 rounded-xl font-bold flex items-center justify-center gap-2 text-gray-400 active:scale-95 transition-transform"
+                className="w-full py-4 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold text-gray-300 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
               >
                 <X size={18} /> Close
               </button>
@@ -216,6 +198,16 @@ export default function SubjectTests() {
           </div>
         </div>
       )}
+
+      <style>{`
+        .animate-scaleIn {
+          animation: scaleIn 0.2s ease-out;
+        }
+        @keyframes scaleIn {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

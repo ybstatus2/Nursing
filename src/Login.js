@@ -1,86 +1,34 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth, db, requestFCMToken } from './firebase';
+import { useState, useEffect } from 'react';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-  GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { auth, db, googleProvider, requestFCMToken } from './firebase';
 import { 
-  LogIn, Mail, Lock, Eye, EyeOff, AlertCircle, UserPlus
+  LogIn, UserPlus, Mail, Lock, Eye, EyeOff, 
+  AlertCircle, ArrowRight, ArrowLeft
 } from 'lucide-react';
 
-export default function Login() {
+export default function Login({ onLoginSuccess }) {
+  const [step, setStep] = useState('welcome'); // welcome | login | register | forgot
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
-  const [resetMode, setResetMode] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
-  const navigate = useNavigate();
-
-  const saveFCMToken = async (uid) => {
-    const token = await requestFCMToken(uid);
-    if(token) {
-      await updateDoc(doc(db, "users", uid), { fcmToken: token });
-    }
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if(!email || !password) { setError('Please fill all fields'); return; }
-    setLoading(true);
-    setError('');
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      await saveFCMToken(result.user.uid);
-      navigate("/lock");
-    } catch(e) { 
-      setError(e.message.includes('invalid') ? 'Invalid email or password' : e.message);
-    }
-    setLoading(false);
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    if(!name || !email || !password) { setError('Please fill all fields'); return; }
-    if(password.length < 6) { setError('Password must be at least 6 characters'); return; }
-    setLoading(true);
-    setError('');
-    try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'users', result.user.uid), {
-        name, email, createdAt: new Date().toISOString()
-      });
-      await saveFCMToken(result.user.uid);
-      navigate("/lock");
-    } catch(e) { 
-      setError(e.message.includes('email-already') ? 'Email already registered' : e.message);
-    }
-    setLoading(false);
-  };
+  const [success, setSuccess] = useState('');
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      await setDoc(doc(db, 'users', user.uid), {
-        name: user.displayName || 'User',
-        email: user.email,
-        photoURL: user.photoURL,
-        createdAt: new Date().toISOString()
-      }, { merge: true });
-      await saveFCMToken(user.uid);
-      navigate("/lock");
+      const result = await signInWithPopup(auth, googleProvider);
+      await saveUserProfile(result.user);
+      onLoginSuccess?.();
     } catch(e) {
       if(e.code !== 'auth/popup-closed-by-user') {
         setError(e.message);
@@ -89,46 +37,104 @@ export default function Login() {
     setLoading(false);
   };
 
-  const handleReset = async () => {
+  const saveUserProfile = async (user) => {
+    await setDoc(doc(db, 'users', user.uid), {
+      name: user.displayName || name || 'User',
+      email: user.email,
+      photoURL: user.photoURL || '',
+      createdAt: new Date().toISOString()
+    }, { merge: true });
+    
+    const token = await requestFCMToken(user.uid);
+    if(token) {
+      await updateDoc(doc(db, 'users', user.uid), { fcmToken: token });
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if(!email || !password) { setError('All fields required'); return; }
+    setLoading(true);
+    setError('');
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await saveUserProfile(result.user);
+      onLoginSuccess?.();
+    } catch(e) {
+      setError(e.message.includes('invalid') ? 'Invalid credentials' : e.message);
+    }
+    setLoading(false);
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if(!name || !email || !password) { setError('All fields required'); return; }
+    if(password.length < 6) { setError('Password min 6 characters'); return; }
+    setLoading(true);
+    setError('');
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      await saveUserProfile(result.user);
+      onLoginSuccess?.();
+    } catch(e) {
+      setError(e.message.includes('email-already') ? 'Email already registered' : e.message);
+    }
+    setLoading(false);
+  };
+
+  const handleForgotPassword = async () => {
     if(!email) { setError('Enter your email first'); return; }
+    setLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      setResetSent(true);
+      setSuccess('Reset link sent to your email!');
       setError('');
-    } catch(e) { setError(e.message); }
+    } catch(e) {
+      setError(e.message);
+    }
+    setLoading(false);
+  };
+
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setName('');
+    setError('');
+    setSuccess('');
   };
 
   return (
-    <div className="h-full flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 overflow-y-auto">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-5">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
-            <span className="text-3xl font-black">R</span>
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-500/30">
+            <span className="text-4xl font-black text-white">R</span>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            RPREP CBT
-          </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            {isRegister ? 'Create your account' : resetMode ? 'Reset Password' : 'Nursing Exam Preparation'}
-          </p>
+          <h1 className="text-3xl font-black text-white">RPREP</h1>
+          <p className="text-gray-400 text-sm mt-1">Nursing Exam Preparation</p>
         </div>
 
+        {/* Error/Success Messages */}
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-3 mb-4 flex items-center gap-2 text-red-300 text-sm">
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 mb-4 flex items-center gap-2 text-red-400 text-sm">
             <AlertCircle size={16} /> {error}
           </div>
         )}
-
-        {resetSent && (
-          <div className="bg-green-500/20 border border-green-500/50 rounded-xl p-3 mb-4 text-green-300 text-sm">
-            Password reset link sent to your email!
+        {success && (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 mb-4 text-green-400 text-sm">
+            {success}
           </div>
         )}
 
-        {!resetMode ? (
-          <form onSubmit={isRegister ? handleRegister : handleLogin} className="space-y-3">
-            <button type="button" onClick={handleGoogleSignIn} disabled={loading}
-              className="w-full py-3 bg-white hover:bg-gray-100 rounded-xl font-medium text-gray-800 flex items-center justify-center gap-3 transition-all disabled:opacity-50">
+        {/* Welcome Screen */}
+        {step === 'welcome' && (
+          <div className="space-y-4 animate-fadeIn">
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="w-full py-4 bg-white hover:bg-gray-100 rounded-2xl font-semibold text-gray-800 flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg"
+            >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -140,67 +146,117 @@ export default function Login() {
 
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-gray-700"></div>
-              <span className="text-gray-500 text-xs">or</span>
+              <span className="text-gray-500 text-sm">or</span>
               <div className="flex-1 h-px bg-gray-700"></div>
             </div>
 
-            {isRegister && (
-              <div className="relative">
-                <UserPlus className="absolute left-4 top-3.5 text-gray-400" size={18} />
-                <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
-              </div>
-            )}
+            <button
+              onClick={() => { setStep('login'); resetForm(); }}
+              className="w-full py-4 bg-gray-800 hover:bg-gray-700 rounded-2xl font-semibold text-white flex items-center justify-center gap-2 transition-all border border-gray-700"
+            >
+              <Mail size={20} /> Login with Email
+            </button>
 
+            <button
+              onClick={() => { setStep('register'); resetForm(); }}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-semibold text-white flex items-center justify-center gap-2 transition-all"
+            >
+              <UserPlus size={20} /> Create Account
+            </button>
+          </div>
+        )}
+
+        {/* Login Form */}
+        {step === 'login' && (
+          <form onSubmit={handleLogin} className="space-y-4 animate-fadeIn">
+            <button type="button" onClick={() => { setStep('welcome'); resetForm(); }} className="text-gray-400 flex items-center gap-1 text-sm mb-2">
+              <ArrowLeft size={16} /> Back
+            </button>
+            <h2 className="text-xl font-bold text-white mb-2">Welcome Back</h2>
+            
             <div className="relative">
-              <Mail className="absolute left-4 top-3.5 text-gray-400" size={18} />
-              <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
+              <Mail className="absolute left-4 top-4 text-gray-500" size={18} />
+              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
             </div>
-
+            
             <div className="relative">
-              <Lock className="absolute left-4 top-3.5 text-gray-400" size={18} />
+              <Lock className="absolute left-4 top-4 text-gray-500" size={18} />
               <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-gray-400">
+                className="w-full pl-12 pr-12 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-500">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl font-bold text-white flex items-center justify-center gap-2 hover:from-blue-500 hover:to-blue-400 transition-all disabled:opacity-50">
-              {isRegister ? <UserPlus size={20} /> : <LogIn size={20} />}
-              {loading ? 'Please wait...' : isRegister ? 'Create Account' : 'Login'}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50">
+              {loading ? 'Logging in...' : 'Login'} <ArrowRight size={18} />
             </button>
 
-            <button type="button" onClick={() => { setIsRegister(!isRegister); setError(''); }} className="w-full text-center text-blue-400 text-sm">
-              {isRegister ? 'Already have an account? Login' : "Don't have an account? Create one"}
+            <button type="button" onClick={() => { setStep('forgot'); resetForm(); }} className="w-full text-center text-blue-400 text-sm">
+              Forgot Password?
             </button>
-
-            {!isRegister && (
-              <button type="button" onClick={() => { setResetMode(true); setError(''); }} className="w-full text-center text-gray-400 text-sm">
-                Forgot Password?
-              </button>
-            )}
           </form>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-gray-300 text-sm text-center">Enter your email to receive reset link</p>
-            <div className="relative">
-              <Mail className="absolute left-4 top-3.5 text-gray-400" size={18} />
-              <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
-            </div>
-            <button onClick={handleReset} className="w-full py-3 bg-blue-600 rounded-xl font-bold text-white">
-              Send Reset Link
+        )}
+
+        {/* Register Form */}
+        {step === 'register' && (
+          <form onSubmit={handleRegister} className="space-y-4 animate-fadeIn">
+            <button type="button" onClick={() => { setStep('welcome'); resetForm(); }} className="text-gray-400 flex items-center gap-1 text-sm mb-2">
+              <ArrowLeft size={16} /> Back
             </button>
-            <button onClick={() => { setResetMode(false); setResetSent(false); setError(''); }} className="w-full text-center text-gray-400 text-sm">
-              Back to Login
+            <h2 className="text-xl font-bold text-white mb-2">Create Account</h2>
+            
+            <div className="relative">
+              <UserPlus className="absolute left-4 top-4 text-gray-500" size={18} />
+              <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
+            </div>
+            
+            <div className="relative">
+              <Mail className="absolute left-4 top-4 text-gray-500" size={18} />
+              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
+            </div>
+            
+            <div className="relative">
+              <Lock className="absolute left-4 top-4 text-gray-500" size={18} />
+              <input type={showPassword ? 'text' : 'password'} placeholder="Password (min 6 chars)" value={password} onChange={e => setPassword(e.target.value)}
+                className="w-full pl-12 pr-12 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-500">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <button type="submit" disabled={loading}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50">
+              {loading ? 'Creating...' : 'Create Account'} <ArrowRight size={18} />
+            </button>
+          </form>
+        )}
+
+        {/* Forgot Password */}
+        {step === 'forgot' && (
+          <div className="space-y-4 animate-fadeIn">
+            <button type="button" onClick={() => { setStep('login'); resetForm(); }} className="text-gray-400 flex items-center gap-1 text-sm mb-2">
+              <ArrowLeft size={16} /> Back
+            </button>
+            <h2 className="text-xl font-bold text-white mb-2">Reset Password</h2>
+            <p className="text-gray-400 text-sm">Enter email to receive reset link</p>
+            
+            <div className="relative">
+              <Mail className="absolute left-4 top-4 text-gray-500" size={18} />
+              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
+            </div>
+
+            <button onClick={handleForgotPassword} disabled={loading}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white transition-all disabled:opacity-50">
+              {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </div>
         )}
-
-        <p className="text-center text-gray-500 text-xs mt-6">v1.0 • Secure Authentication</p>
       </div>
     </div>
   );

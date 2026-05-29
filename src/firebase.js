@@ -1,5 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { 
+  getAuth, 
+  browserLocalPersistence, 
+  setPersistence,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
@@ -13,10 +19,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const messaging = getMessaging(app);
-export { app };
+const auth = getAuth(app);
+
+// Initialize persistence immediately
+setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+const db = getFirestore(app);
+const messaging = getMessaging(app);
+const googleProvider = new GoogleAuthProvider();
+
+export { auth, db, messaging, app, googleProvider };
 
 export async function requestFCMToken(userId) {
   try {
@@ -34,7 +46,5 @@ export async function requestFCMToken(userId) {
 }
 
 export function onMessageListener(callback) {
-  return onMessage(messaging, (payload) => {
-    callback(payload);
-  });
+  return onMessage(messaging, (payload) => callback(payload));
 }
