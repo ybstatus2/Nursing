@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './ThemeContext';
 import { auth } from './firebase';
-import { App as CapacitorApp } from '@capacitor/app';
 import SplashScreen from './SplashScreen';
 import Layout from './Layout';
 import Login from './Login';
@@ -23,44 +22,23 @@ import History from './History';
 import Performance from './Performance';
 import Bookmarks from './Bookmarks';
 import MockTests from './MockTests';
-import Admin from "./Admin";
 import StudyMaterials from './StudyMaterials';
+import Admin from './Admin';
 
 function AppContent() {
   const [appState, setAppState] = useState('splash');
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
       setUser(u);
+      if (!u) {
+        setAppState('login');
+        sessionStorage.removeItem('rprep_unlocked');
+      }
     });
     return unsubscribe;
   }, []);
-
-  // Handle hardware back button
-  useEffect(() => {
-    const backButtonHandler = () => {
-      // If we are in the main app, try to go back
-      if (appState === 'main') {
-        if (window.location.pathname !== '/dashboard') {
-          navigate(-1); // Go back in history
-        } else {
-          // At dashboard, exit app
-          CapacitorApp.exitApp();
-        }
-      } else if (appState === 'login' || appState === 'lock') {
-        // At login or lock screen, exit
-        CapacitorApp.exitApp();
-      }
-    };
-
-    CapacitorApp.addListener('backButton', backButtonHandler);
-
-    return () => {
-      // Remove listener if needed (but for Capacitor, it's usually fine)
-    };
-  }, [appState, navigate]);
 
   const handleSplashFinish = () => {
     if (user) {
@@ -78,11 +56,12 @@ function AppContent() {
 
   const handleLoginSuccess = () => {
     const hasPin = localStorage.getItem('rprep_pin');
-    if (!hasPin) {
+    if (hasPin) {
+      // Always go to lock screen first, do not set session unlocked
       setAppState('lock');
     } else {
-      sessionStorage.setItem('rprep_unlocked', 'true');
-      setAppState('main');
+      // No pin set, go to lock to create one
+      setAppState('lock');
     }
   };
 
@@ -122,8 +101,8 @@ function AppContent() {
         <Route path="/performance" element={<Performance />} />
         <Route path="/bookmarks" element={<Bookmarks />} />
         <Route path="/mock-tests" element={<MockTests />} />
+        <Route path="/study-materials" element={<StudyMaterials />} />
         <Route path="/admin" element={<Admin />} />
-            <Route path="/study-materials" element={<StudyMaterials />} />
       </Route>
     </Routes>
   );

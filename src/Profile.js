@@ -50,9 +50,7 @@ export default function Profile() {
   const saveProfile = async () => {
     if (!user) return;
     try {
-      // Update Firebase Auth profile
       await updateProfile(user, { displayName: name });
-      // Update Firestore user document
       await updateDoc(doc(db, 'users', user.uid), { name });
       setEditing(false);
     } catch(e) { alert('Update failed: ' + e.message); }
@@ -62,7 +60,6 @@ export default function Profile() {
 
   return (
     <div className={`h-full overflow-y-auto ${bg} pb-20`}>
-      {/* Cover + Avatar */}
       <div className="bg-gradient-to-br from-blue-900 to-gray-900 px-5 pt-8 pb-10">
         <button onClick={() => navigate(-1)} className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center mb-4">
           <ArrowLeft size={16} className="text-white" />
@@ -92,7 +89,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="px-4 -mt-6">
         <div className="grid grid-cols-4 gap-2">
           {[
@@ -110,7 +106,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Account Details */}
       <div className="px-4 mt-4">
         <div className={`${cardBg} rounded-2xl p-4`}>
           <h3 className="font-bold text-sm mb-3 flex items-center gap-2"><User size={16} className="text-blue-400" /> Account Details</h3>
@@ -123,7 +118,11 @@ export default function Profile() {
       </div>
 
       <div className="px-4 mt-4 mb-4">
-        <button onClick={() => { auth.signOut(); navigate('/'); }} className="w-full py-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 font-bold text-sm">
+        <button onClick={() => {
+          auth.signOut();
+          sessionStorage.removeItem('rprep_unlocked');
+          window.location.reload();
+        }} className="w-full py-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 font-bold text-sm">
           Logout
         </button>
       </div>

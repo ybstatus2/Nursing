@@ -233,9 +233,22 @@ export default function Admin() {
 
   const sendNotification = async () => {
     try {
-      await addDoc(collection(db, 'notifications'), { title: notifyTitle, body: notifyBody, createdAt: serverTimestamp() });
-      showMsg('Notification queued! (Cloud Function required to send)');
-    } catch(e) { showMsg('Error: ' + e.message); }
+      const response = await fetch("https://onesignal.com/api/v1/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Basic 4dfflk3esuc6vrwofw3pcr4qk"
+        },
+        body: JSON.stringify({
+          app_id: "e1b2bf29-31d8-4087-b3a7-829c02fa7e4c",
+          headings: { en: notifyTitle },
+          contents: { en: notifyBody },
+          included_segments: ["All"]
+        })
+      });
+      if (response.ok) showMsg("✅ Notification sent successfully!");
+      else showMsg("❌ Failed to send notification");
+    } catch(e) { showMsg("Error: " + e.message); }
   };
 
   const bg = darkMode ? 'bg-gray-950' : 'bg-gray-50';
