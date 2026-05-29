@@ -1,5 +1,14 @@
 {
   "appId": "com.rprep.app",
   "appName": "RPREP",
-  "webDir": "build"
+  "webDir": "build",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "App": {
+      "androidClientId": "583546522601-rscof5rmp5ehk8t7b1gfun0qc82ps2es.apps.googleusercontent.com"
+    }
+  }
 }

@@ -42,9 +42,8 @@ function AppContent() {
 
   const handleSplashFinish = () => {
     if (user) {
-      const hasPin = localStorage.getItem('rprep_pin');
       const isUnlocked = sessionStorage.getItem('rprep_unlocked');
-      if (hasPin && !isUnlocked) {
+      if (!isUnlocked) {
         setAppState('lock');
       } else {
         setAppState('main');
@@ -55,28 +54,21 @@ function AppContent() {
   };
 
   const handleLoginSuccess = () => {
-    const hasPin = localStorage.getItem('rprep_pin');
-    if (hasPin) {
-      // Always go to lock screen first, do not set session unlocked
-      setAppState('lock');
-    } else {
-      // No pin set, go to lock to create one
-      setAppState('lock');
-    }
+    // Always go to lock screen after login
+    setAppState('lock');
   };
 
   const handleUnlock = () => {
+    sessionStorage.setItem('rprep_unlocked', 'true');
     setAppState('main');
   };
 
   if (appState === 'splash') {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
-
   if (appState === 'login') {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
-
   if (appState === 'lock') {
     return <AppLock onUnlock={handleUnlock} />;
   }
